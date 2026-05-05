@@ -235,37 +235,45 @@ These are the rules of engagement to get maximum leverage from AI in this projec
 | 2026-05-04 | Digest default filter: thesis + watchlist (skip hidden by default) | Compresses 211 papers to ~9 visible on first paint. Counts header always shows full distribution so a misfire is detectable. |
 | 2026-05-04 | Cowork: candidate replacement for Week 6 automation milestone + future trade-press scraping | Defer until digest is validated. Don't automate an unproven pipeline. Revisit at end of Week 4 / start of Week 5. |
 | 2026-05-04 | Production run #1: 211 papers scored, $2.83, 0 failures, 0 thesis flags / 9 watchlist | 0 thesis is consistent with prompt's stinginess — top paper (fleet-scale RL, final=6.0) correctly flagged watchlist because beneficiaries are private. Watchlist tier becomes the de-facto top tier on most days. |
+| 2026-05-04 | Dark mode locked via `.streamlit/config.toml` | Forced dark theme for all viewers; operator preference, digest CSS assumes dark background |
+| 2026-05-04 | Public GitHub repo at JamieMancuso/trend-engine | Simplest deploy path; nothing sensitive in source |
+| 2026-05-04 | CSV deployment strategy: commit `results_*.csv` to repo | Zero extra infrastructure; auto-redeploys on git push after each scoring run |
+| 2026-05-04 | Streamlit Cloud deployed, Python 3.14, free tier | Mobile-accessible at trend-engine-76lmj4cwezv3p7jhctym3s.streamlit.app |
+| 2026-05-04 | Cowork project set up pointing at trend-engine folder | File maintenance agent for post-session charter updates |
 
 ## 10. Current Status & Next Actions
 
-**Phase:** End of Week 4 — local digest shipped. Week 3 (Semantic Scholar) deferred behind Week 4 because the digest UX was the higher-priority unlock. Citation velocity is now Week 5's first task.
+**Phase:** End of Week 4.5 — digest deployed and Cowork file-maintenance agent live. Week 4 shipped the local Streamlit digest; Week 4.5 (this session) closed out items 1–2 of the original Week 5 list — dark-mode lock and GitHub + Streamlit Cloud deploy — plus stood up Cowork against the project folder. Week 5 proper now opens with prompt caching, then Semantic Scholar citation velocity. Day 45 checkpoint follows.
 
 **Working files:**
 - `week1_arxiv_fetcher.py` — patched: emits arXiv ID per paper, RECENCY_DAYS=7
 - `week2_scoring_prompt_v02.py` — stable
-- `week2_run_scoring.py` — patched: `published` added to output schema
+- `week2_run_scoring.py` — patched: `published` added to output schema; prompt caching not yet enabled
 - `week2_compare_scores.py` — comparison/divergence analyzer
-- `week4_digest.py` — Streamlit app, single file, runs locally
+- `week4_digest.py` — Streamlit app, single file, deployed to Streamlit Cloud
+- `.streamlit/config.toml` — forces dark theme for all viewers
 - `eval_set_v1.xlsx` / `eval_set_v1__Scoring.csv` — hand-scored eval set
 - `clean_latex.py` — utility for human-facing abstract rendering
 
+**Deployment:** Public GitHub repo `JamieMancuso/trend-engine`. Streamlit Cloud free tier, Python 3.14, live at `trend-engine-76lmj4cwezv3p7jhctym3s.streamlit.app`. CSVs commit to repo so each scoring run auto-redeploys via git push.
+
 **Last run (scorer):** 211 papers, v0.2 prompt, $2.83 total, 0 failures, 0 thesis / 9 watchlist / 202 skip flags. Date range 2026-04-28 to 2026-05-01 (4 distinct dates — arXiv weekend gap shows up clearly in the spread).
 
-**Week 4 outcomes:**
+**Week 4 / 4.5 outcomes:**
 - Digest renders cards with sub-scores, translation, vehicles, rationale expander, arxiv link
 - Filters work: domain, flag, min final score, "named vehicle only" toggle, sort by score/date/domain
 - Default view ("thesis + watchlist") collapses 211 papers → 9 actionable cards
 - Confirmed watchlist papers are legit signals: fleet-scale RL (SYM/TER), GaN-on-silicon (NVTS/WOLF), ECMWF ocean modeling, autonomous depot vehicles (XPO/ODFL/UPS/AMZN)
-- Light-mode rendering is unreadable (card colors assume dark background) — known issue, fix in Week 5
+- Light-mode rendering issue resolved by forcing dark theme via `.streamlit/config.toml`
+- Digest mobile-accessible via Streamlit Cloud
+- Cowork file-maintenance agent now points at the project folder; handles post-session charter updates so closeout docs flow into §9 / §10 automatically
 - Pipeline ergonomics: refetch + score takes ~15 min wall time and ~$3 at current settings; well within budget
 
 ### Next concrete actions (Week 5)
 
-1. **Fix light-mode rendering** in `week4_digest.py` — detect Streamlit's active theme and swap palette, or commit to dark-only with a forced theme config.
-2. **GitHub + Streamlit Cloud deploy** — the deferred Path B work. ~30-60 min for first-time setup; gets the digest onto your phone.
-3. **Enable prompt caching** in `week2_run_scoring.py` — rubric is stable since v0.2; ~90% cost cut on system prompt; should bring per-run cost from ~$2.83 to ~$0.80.
-4. **Semantic Scholar citation velocity** (originally Week 3) — build `week5_semantic_scholar.py` to enrich scored CSV with citation counts. This is the substantive maturation signal the LLM can't see from abstracts alone.
-5. **Day 45 checkpoint review** — formal go/no-go on the stretch goal (1-2 written theses). Core (working digest + Python fluency) clearly hit. Decision: are watchlist papers + future citation velocity enough signal to start a real thesis draft?
+1. **Enable prompt caching** in `week2_run_scoring.py` — rubric is stable since v0.2; ~90% cost cut on system prompt; should bring per-run cost from ~$2.83 to ~$0.80. Verify by re-running the same 211 papers and stamping the saving.
+2. **Semantic Scholar citation velocity** (originally Week 3) — build `week5_semantic_scholar.py` to enrich scored CSV with citation counts. Decisions to make: which metric (total / last-90-day / influential), and whether to merge into the scored row or join via separate file on `id`. Run on the eval set first, then production.
+3. **Day 45 checkpoint review** — formal go/no-go on the stretch goal (1-2 written theses). Core (working digest + Python fluency) clearly hit. Decision: are watchlist papers + citation velocity enough signal to start a real thesis draft? If no, stay on infra and revisit Day 60. Don't fake theses to hit the milestone.
 
 ## 11. Open Questions / Parking Lot
 
