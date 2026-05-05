@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Project-specific
+snapshots/          # fetcher outputs; deployed app doesn't need these
+arxiv_papers.csv    # latest-pointer to a snapshot; deployed app doesn't need it
+
+# Secrets — never commit
+.env
+*.env
+*.key
+# IDE
+.idea/              # PyCharm — already exists in your folder
+
+# Cache
+.s2_cache/          # Semantic Scholar cache from Week 3
