@@ -26,11 +26,16 @@ WHAT IT EXPECTS:
 - Schema must match week2_run_scoring.py's OUTPUT_COLUMNS — specifically:
   id, domain, title, abstract, url, published, llm_*, prompt_version, model.
 
+MULTI-RUN MODE (sidebar toggle):
+- Merges all results_*.csv files in the current directory.
+- Deduplicates on paper ID, keeping the most recently scored row per paper.
+- Useful once you have several runs and want a unified best-of view.
+
 NOT IN THIS VERSION (deferred to post-MVP per Week 4 spec):
 - Pagination (renders fine at 200-300 rows)
 - URL-based filter state (Streamlit's query_params API is fiddly)
 - "Why this scored X" expandable explainers (rationale field already shows it)
-- Citation velocity column (Week 3 Semantic Scholar work, joins later)
+- Citation velocity column (Semantic Scholar work, deferred indefinitely)
 """
 
 from __future__ import annotations
@@ -68,20 +73,54 @@ def find_latest_results() -> str | None:
     return matches[-1] if matches else None
 
 
-@st.cache_data(show_spinner=False)
-def load_results(path: str) -> pd.DataFrame:
-    """
-    Load and lightly normalize the results CSV. Cached so filter changes
-    don't re-read the file. The cache invalidates if `path` changes (i.e.
-    if the user types a different filename).
-    """
-    df = pd.read_csv(path)
+def find_all_results() -> list[str]:
+    """Return all results_*.csv files sorted oldest → newest."""
+    return sorted(glob.glob(RESULTS_GLOB))
 
+
+@st.cache_data(show_spinner=False)
+def load_all_results(file_tuple: tuple[str, ...]) -> tuple[pd.DataFrame, int]:
+    """
+    Merge all results CSVs into one DataFrame, deduplicated by paper ID.
+    Keeps the most recently scored row per paper (by run_timestamp).
+    Returns (merged_df, num_runs).
+
+    Cache key is a tuple of filenames — invalidates automatically when new
+    results files appear (Streamlit re-hashes the tuple on each run).
+    """
+    frames = []
+    for path in file_tuple:
+        try:
+            frames.append(pd.read_csv(path))
+        except Exception:
+            pass   # skip unreadable files silently
+
+    if not frames:
+        return pd.DataFrame(), 0
+
+    combined = pd.concat(frames, ignore_index=True)
+
+    # Sort by run_timestamp so the last row per ID is the most recent score.
+    if "run_timestamp" in combined.columns:
+        combined = combined.sort_values("run_timestamp", ascending=True)
+
+    # Keep last occurrence of each ID (most recent score).
+    combined = combined.drop_duplicates(subset=["id"], keep="last").reset_index(drop=True)
+
+    return _normalize(combined), len(file_tuple)
+
+
+def _normalize(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Shared normalization applied to any loaded DataFrame — whether single-file
+    or merged multi-run. Coerces types, parses vehicles list, parses dates.
+    """
     # Coerce numeric columns — pandas reads them as int/float automatically
     # but we guard against the occasional cell that comes through as string.
     for col in ("llm_maturation", "llm_profit_mechanism", "llm_retail_accessibility",
                 "llm_specificity", "llm_final"):
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
     # Parse public_vehicles: stored as JSON-stringified list. Decode to list.
     # Defensive: empty string and "[]" both → empty list.
@@ -101,6 +140,15 @@ def load_results(path: str) -> pd.DataFrame:
     df["published_date"] = df["published_dt"].dt.strftime("%Y-%m-%d").fillna("")
 
     return df
+
+
+@st.cache_data(show_spinner=False)
+def load_results(path: str) -> pd.DataFrame:
+    """
+    Load and normalize a single results CSV. Cached so filter changes
+    don't re-read the file. The cache invalidates if `path` changes.
+    """
+    return _normalize(pd.read_csv(path))
 
 
 # ---- UI HELPERS ------------------------------------------------------------
@@ -274,23 +322,40 @@ def main():
 
     # ---- Sidebar: file picker + filters ----
     st.sidebar.header("Source")
-    default_path = find_latest_results()
-    if default_path is None:
+
+    all_result_files = find_all_results()
+    if not all_result_files:
         st.error("No results_*.csv found in the current directory. "
                  "Run week2_run_scoring.py first.")
         st.stop()
 
-    # File override — usually you just want the latest, but keep the door open.
-    csv_path = st.sidebar.text_input("Results CSV", value=default_path,
-                                     help="Path to a results_*.csv file.")
-    if not Path(csv_path).exists():
-        st.error(f"File not found: {csv_path}")
-        st.stop()
+    # Multi-run toggle — merges all CSVs when enabled
+    multi_run = st.sidebar.toggle(
+        "Merge all runs",
+        value=False,
+        help="Combines every results_*.csv, keeping the latest score per paper. "
+             "Good for a cross-run best-of view once several runs have accumulated.",
+    )
 
-    df = load_results(csv_path)
-    st.sidebar.caption(f"Loaded **{len(df)}** papers from `{Path(csv_path).name}`")
-    if "run_timestamp" in df.columns and len(df) > 0:
-        st.sidebar.caption(f"Scored: {df['run_timestamp'].iloc[0]}")
+    num_runs = 1
+    if multi_run:
+        df, num_runs = load_all_results(tuple(all_result_files))
+        if df.empty:
+            st.error("Could not load any results files.")
+            st.stop()
+        st.sidebar.caption(f"Merged **{num_runs}** run(s) · **{len(df)}** unique papers")
+    else:
+        # Single-file mode: default to latest, allow override
+        default_path = all_result_files[-1]
+        csv_path = st.sidebar.text_input("Results CSV", value=default_path,
+                                         help="Path to a results_*.csv file.")
+        if not Path(csv_path).exists():
+            st.error(f"File not found: {csv_path}")
+            st.stop()
+        df = load_results(csv_path)
+        st.sidebar.caption(f"Loaded **{len(df)}** papers from `{Path(csv_path).name}`")
+        if "run_timestamp" in df.columns and len(df) > 0:
+            st.sidebar.caption(f"Scored: {df['run_timestamp'].iloc[0]}")
 
     # ---- Filters ----
     st.sidebar.markdown("---")
@@ -347,8 +412,9 @@ def main():
 
     # ---- Counts header ----
     flag_counts = filtered["llm_flag"].value_counts()
+    run_label = f" across {num_runs} runs" if multi_run and num_runs > 1 else ""
     counts_text = (
-        f"**{len(filtered)}** papers · "
+        f"**{len(filtered)}** papers{run_label} · "
         f"thesis: {flag_counts.get('thesis', 0)} · "
         f"watchlist: {flag_counts.get('watchlist', 0)} · "
         f"skip: {flag_counts.get('skip', 0)}"

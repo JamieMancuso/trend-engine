@@ -240,6 +240,12 @@ These are the rules of engagement to get maximum leverage from AI in this projec
 | 2026-05-04 | CSV deployment strategy: commit `results_*.csv` to repo | Zero extra infrastructure; auto-redeploys on git push after each scoring run |
 | 2026-05-04 | Streamlit Cloud deployed, Python 3.14, free tier | Mobile-accessible at trend-engine-76lmj4cwezv3p7jhctym3s.streamlit.app |
 | 2026-05-04 | Cowork project set up pointing at trend-engine folder | File maintenance agent for post-session charter updates |
+| 2026-05-05 | Prompt caching enabled in week2_run_scoring.py | Rubric stable at v0.2; cache_control="ephemeral" on system prompt block; adds cache_write_tokens + cache_read_tokens columns to output CSV; summary prints uncached vs actual cost comparison |
+| 2026-05-05 | Semantic Scholar citation velocity deferred indefinitely | Fresh arXiv papers have no citations yet — signal would arrive too late to be useful at fetch time. Would only work as a retroactive enrichment pass on older papers; different workflow, not worth building now |
+| 2026-05-05 | Day 45 checkpoint recalibrated | Project started 2026-04-17; Day 45 = ~June 1. First digest day was 2026-05-04. No meaningful signal to evaluate yet; checkpoint remains on track |
+| 2026-05-05 | Multi-run digest mode added to week4_digest.py | Sidebar toggle merges all results_*.csv, deduplicates by paper ID (latest score wins), shows "X runs merged" in counts header. Single-file mode unchanged. |
+| 2026-05-05 | run_pipeline.py built — fetch → score → digest in one command | Chains three stages via subprocess; halts on non-zero exit code; supports --limit, --skip-fetch, --no-browser, --dry-run. Replaces the manual 3-step run workflow. |
+| 2026-05-05 | Global dedup added to week2_run_scoring.py | Scorer now loads all previously scored IDs from every results_*.csv before each run and skips them automatically. 7-day fetch window means ~90% of papers in a given fetch were already scored; dedup drops a typical run from ~200 papers to ~20-30 genuinely new ones. |
 
 ## 10. Current Status & Next Actions
 
@@ -248,9 +254,10 @@ These are the rules of engagement to get maximum leverage from AI in this projec
 **Working files:**
 - `week1_arxiv_fetcher.py` — patched: emits arXiv ID per paper, RECENCY_DAYS=7
 - `week2_scoring_prompt_v02.py` — stable
-- `week2_run_scoring.py` — patched: `published` added to output schema; prompt caching not yet enabled
+- `week2_run_scoring.py` — prompt caching enabled (cache_control=ephemeral on system prompt); output CSV gains cache_write_tokens + cache_read_tokens columns
 - `week2_compare_scores.py` — comparison/divergence analyzer
-- `week4_digest.py` — Streamlit app, single file, deployed to Streamlit Cloud
+- `week4_digest.py` — multi-run mode added: sidebar toggle merges all results_*.csv, deduplicates by paper ID
+- `run_pipeline.py` — NEW: one command fetch → score → digest (--limit, --skip-fetch, --no-browser, --dry-run)
 - `.streamlit/config.toml` — forces dark theme for all viewers
 - `eval_set_v1.xlsx` / `eval_set_v1__Scoring.csv` — hand-scored eval set
 - `clean_latex.py` — utility for human-facing abstract rendering
@@ -271,9 +278,12 @@ These are the rules of engagement to get maximum leverage from AI in this projec
 
 ### Next concrete actions (Week 5)
 
-1. **Enable prompt caching** in `week2_run_scoring.py` — rubric is stable since v0.2; ~90% cost cut on system prompt; should bring per-run cost from ~$2.83 to ~$0.80. Verify by re-running the same 211 papers and stamping the saving.
-2. **Semantic Scholar citation velocity** (originally Week 3) — build `week5_semantic_scholar.py` to enrich scored CSV with citation counts. Decisions to make: which metric (total / last-90-day / influential), and whether to merge into the scored row or join via separate file on `id`. Run on the eval set first, then production.
-3. **Day 45 checkpoint review** — formal go/no-go on the stretch goal (1-2 written theses). Core (working digest + Python fluency) clearly hit. Decision: are watchlist papers + citation velocity enough signal to start a real thesis draft? If no, stay on infra and revisit Day 60. Don't fake theses to hit the milestone.
+1. ✅ **Prompt caching enabled** in `week2_run_scoring.py` — verified working; per-run cost target ~$0.80 vs prior $2.83.
+2. ✅ **Multi-run digest mode** — sidebar "Merge all runs" toggle in `week4_digest.py`; deduplicates by paper ID, latest score wins.
+3. ✅ **`run_pipeline.py`** — one command replaces manual 3-step workflow; supports --limit, --skip-fetch, --no-browser, --dry-run.
+4. ~~Semantic Scholar citation velocity~~ — **Deferred indefinitely.** Fresh papers have no citations at fetch time.
+5. **Day 45 checkpoint** (≈ June 1) — first real digest day was May 4. Keep running every other day and let signal accumulate. Go/no-go on thesis stretch at Day 45.
+6. **Use the system.** Daily habit: `py -3.14 run_pipeline.py` every other day, open digest, flag anything interesting. Reps matter more than new features right now.
 
 ## 11. Open Questions / Parking Lot
 
