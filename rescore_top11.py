@@ -1,5 +1,5 @@
 """
-rescore_top11.py — One-off re-score of top 11 papers with v0.3 prompt
+rescore_top11.py — One-off re-score of top 11 papers with v0.4 prompt
 ----------------------------------------------------------------------
 Scores a fixed list of arXiv IDs using the current prompt (v0.3), which
 adds the Horizon dimension and longshot flag. Bypasses global dedup so
@@ -55,16 +55,26 @@ def main() -> int:
         print("ERROR: ANTHROPIC_API_KEY not set.", file=sys.stderr)
         return 2
 
-    # Load all papers from the latest fetch
-    all_papers = load_papers("arxiv_papers.csv", limit=None)
+    # Load papers from all results CSVs — abstracts are preserved there even
+    # after papers age out of the 7-day arxiv_papers.csv fetch window.
+    import glob as _glob
     target_set = set(TARGET_IDS)
-    to_score = [p for p in all_papers if p["id"] in target_set]
+    seen_ids: set[str] = set()
+    to_score: list[dict] = []
 
-    found_ids = {p["id"] for p in to_score}
-    missing = target_set - found_ids
+    for path in sorted(_glob.glob("results_*.csv")):
+        try:
+            papers = load_papers(path, limit=None)
+            for p in papers:
+                if p["id"] in target_set and p["id"] not in seen_ids:
+                    to_score.append(p)
+                    seen_ids.add(p["id"])
+        except Exception:
+            pass
+
+    missing = target_set - seen_ids
     if missing:
-        print(f"WARNING: {len(missing)} IDs not found in arxiv_papers.csv: {missing}")
-        print("These may have aged out of the 7-day fetch window.")
+        print(f"WARNING: {len(missing)} IDs not found in any results CSV: {missing}")
 
     print(f"Prompt version: {PROMPT_VERSION}")
     print(f"Scoring {len(to_score)} papers → {OUTPUT_FILE}\n")

@@ -76,7 +76,8 @@ MAX_RETRIES = 3              # on transient API failure
 # The fields we expect the LLM to return (from the prompt spec).
 EXPECTED_JSON_KEYS = {
     "maturation", "profit_mechanism", "retail_accessibility", "specificity", "horizon",
-    "final", "flag", "time_to_thesis", "translation", "public_vehicles", "rationale",
+    "final", "flag", "time_to_thesis", "translation", "public_vehicles",
+    "score_explanations", "rationale",
 }
 
 # Columns written to the output CSV. Everything from the input is preserved
@@ -89,7 +90,7 @@ OUTPUT_COLUMNS = [
     "llm_specificity", "llm_horizon", "llm_final",
     # LLM extras
     "llm_flag", "llm_time_to_thesis", "llm_translation",
-    "llm_public_vehicles", "llm_rationale",
+    "llm_public_vehicles", "llm_score_explanations", "llm_rationale",
     # Run metadata (for version tracking and cost audit)
     "prompt_version", "model", "input_tokens", "output_tokens",
     "cache_write_tokens", "cache_read_tokens", "cost_usd",
@@ -279,12 +280,13 @@ def score_paper(client: Anthropic, paper: dict, model: str) -> dict:
         "llm_horizon":               parsed["horizon"],
         "llm_final":                 parsed["final"],
         # LLM extras
-        "llm_flag":             parsed["flag"],
-        "llm_time_to_thesis":   parsed["time_to_thesis"],
-        "llm_translation":      parsed["translation"],
-        # Lists: json-dump so CSV round-trips cleanly
-        "llm_public_vehicles":  json.dumps(parsed["public_vehicles"]),
-        "llm_rationale":        parsed["rationale"],
+        "llm_flag":               parsed["flag"],
+        "llm_time_to_thesis":     parsed["time_to_thesis"],
+        "llm_translation":        parsed["translation"],
+        # Lists/dicts: json-dump so CSV round-trips cleanly
+        "llm_public_vehicles":    json.dumps(parsed["public_vehicles"]),
+        "llm_score_explanations": json.dumps(parsed.get("score_explanations", {})),
+        "llm_rationale":          parsed["rationale"],
         # Run metadata
         "prompt_version":     PROMPT_VERSION,
         "model":              model,

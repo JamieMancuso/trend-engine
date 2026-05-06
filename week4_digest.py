@@ -285,6 +285,122 @@ def render_footer(row) -> str:
     """
 
 
+SCORE_LABELS = {
+    "maturation":          ("MAT",  "Maturation"),
+    "profit_mechanism":    ("PROF", "Profit Mechanism"),
+    "retail_accessibility":("RET",  "Retail Accessibility"),
+    "specificity":         ("SPEC", "Specificity"),
+    "horizon":             ("HRZ",  "Horizon"),
+}
+
+
+def get_score_explanations(row) -> dict:
+    """Parse llm_score_explanations from JSON string. Returns {} if missing/malformed."""
+    raw = row.get("llm_score_explanations", "")
+    if not isinstance(raw, str) or not raw.strip():
+        return {}
+    try:
+        parsed = json.loads(raw)
+        return parsed if isinstance(parsed, dict) else {}
+    except (json.JSONDecodeError, ValueError):
+        return {}
+
+
+def render_detail(row) -> None:
+    """Full detail page for a single paper, shown when title is clicked."""
+
+    # Back button
+    if st.button("← Back to digest", key="back"):
+        st.session_state.selected_id = None
+        st.rerun()
+
+    st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
+
+    # Header: domain + title + badge
+    col_title, col_badge = st.columns([8, 1.2])
+    with col_badge:
+        st.markdown(render_score_badge(row["llm_final"], row["llm_flag"]),
+                    unsafe_allow_html=True)
+    with col_title:
+        st.markdown(
+            f'<div style="font-family: monospace; font-size: 11px; letter-spacing: 0.15em; '
+            f'color: #64748b; text-transform: uppercase; margin-bottom: 6px;">{row["domain"]}</div>'
+            f'<div style="font-family: Georgia, serif; font-size: 24px; line-height: 1.3; '
+            f'font-weight: 600; color: #e2e8f0;">{row["title"]}</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(render_footer(row), unsafe_allow_html=True)
+    st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
+
+    # Translation
+    st.markdown(
+        f'<div style="font-size: 15px; line-height: 1.6; color: #cbd5e1; '
+        f'margin-bottom: 32px;">{row["llm_translation"]}</div>',
+        unsafe_allow_html=True,
+    )
+
+    # Score breakdown — definition + paper-specific explanation per axis
+    st.markdown(
+        '<div style="font-family: Georgia, serif; font-size: 18px; '
+        'color: #e2e8f0; margin-bottom: 16px;">Score Breakdown</div>',
+        unsafe_allow_html=True,
+    )
+
+    explanations = get_score_explanations(row)
+    score_keys = [
+        ("maturation",           "llm_maturation"),
+        ("profit_mechanism",     "llm_profit_mechanism"),
+        ("retail_accessibility", "llm_retail_accessibility"),
+        ("specificity",          "llm_specificity"),
+        ("horizon",              "llm_horizon"),
+    ]
+
+    for key, col in score_keys:
+        val = row.get(col)
+        if val is None or (isinstance(val, float) and pd.isna(val)):
+            continue   # skip axes not present in older scored rows
+
+        abbr, label = SCORE_LABELS[key]
+        tooltip = SUBSCORE_TOOLTIPS.get(abbr, "")
+        explanation = explanations.get(key, "")
+        is_horizon = key == "horizon"
+        bg = "rgba(52,120,80,0.10)" if is_horizon else "rgba(120,120,140,0.07)"
+        border = "rgba(52,120,80,0.3)" if is_horizon else "rgba(120,120,140,0.2)"
+
+        st.markdown(f"""
+        <div style="
+            background: {bg};
+            border: 1px solid {border};
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+        ">
+            <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px;">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px;
+                             letter-spacing: 0.12em; color: #64748b;">{abbr}</span>
+                <span style="font-family: Georgia, serif; font-size: 16px;
+                             color: #e2e8f0; font-weight: 600;">{label}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px;
+                             color: #e2e8f0; font-weight: 700; margin-left: auto;">{int(val)}</span>
+            </div>
+            <div style="font-size: 12px; color: #64748b; margin-bottom: {"8px" if explanation else "0"};">
+                {tooltip}
+            </div>
+            {"" if not explanation else f'<div style="font-size: 13px; color: #94a3b8; font-style: italic; border-top: 1px solid rgba(120,120,140,0.15); padding-top: 8px;">{explanation}</div>'}
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Rationale + metadata
+    st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
+    st.markdown(f"**Rationale:** *{row.get('llm_rationale', '')}*")
+    st.caption(
+        f"Prompt {row.get('prompt_version', '?')} · "
+        f"{row.get('model', '?')} · "
+        f"id `{row['id']}`"
+    )
+
+
 def render_card(row) -> None:
     """Render a single paper as a card. Uses two columns: text + score badge."""
     with st.container():
@@ -296,16 +412,19 @@ def render_card(row) -> None:
                         unsafe_allow_html=True)
 
         with col_text:
-            # Domain tag + title
+            # Domain tag
             st.markdown(
                 f'<div style="font-family: monospace; font-size: 11px; '
                 f'letter-spacing: 0.15em; color: #64748b; '
-                f'text-transform: uppercase; margin-bottom: 4px;">{row["domain"]}</div>'
-                f'<div style="font-family: Georgia, serif; font-size: 19px; '
-                f'line-height: 1.3; font-weight: 600; color: #e2e8f0;">'
-                f'{row["title"]}</div>',
+                f'text-transform: uppercase; margin-bottom: 4px;">{row["domain"]}</div>',
                 unsafe_allow_html=True,
             )
+
+            # Title as a clickable button — opens detail page
+            if st.button(row["title"], key=f"title_{row['id']}",
+                         help="Click to see full score breakdown"):
+                st.session_state.selected_id = row["id"]
+                st.rerun()
 
             # Sub-scores
             st.markdown(render_subscores(row), unsafe_allow_html=True)
@@ -316,13 +435,6 @@ def render_card(row) -> None:
                 f'{row["llm_translation"]}</div>',
                 unsafe_allow_html=True,
             )
-
-            # Expandable rationale (the "why this scored X" audit trail)
-            with st.expander("Scoring rationale"):
-                st.markdown(f"*{row['llm_rationale']}*")
-                st.caption(f"Prompt {row.get('prompt_version', '?')} · "
-                           f"{row.get('model', '?')} · "
-                           f"id `{row['id']}`")
 
         # Footer rendered outside the column so unsafe_allow_html is always honoured.
         # Some Streamlit versions silently ignore it inside st.columns contexts.
@@ -367,6 +479,10 @@ def main():
         '</div>',
         unsafe_allow_html=True,
     )
+
+    # ---- Session state init ----
+    if "selected_id" not in st.session_state:
+        st.session_state.selected_id = None
 
     # ---- Sidebar: file picker + filters ----
     st.sidebar.header("Source")
@@ -458,6 +574,17 @@ def main():
 
     filtered = filtered.sort_values(by=sort_col, ascending=sort_asc, kind="stable")
 
+    # ---- Detail page ----
+    # If a paper title was clicked, show the detail view instead of the card list.
+    if st.session_state.selected_id:
+        match = df[df["id"] == st.session_state.selected_id]
+        if not match.empty:
+            render_detail(match.iloc[0])
+            return
+        else:
+            # ID not found (e.g. switched CSV) — fall back to list
+            st.session_state.selected_id = None
+
     # ---- Counts header ----
     flag_counts = filtered["llm_flag"].value_counts()
     run_label = f" across {num_runs} runs" if multi_run and num_runs > 1 else ""
@@ -465,6 +592,7 @@ def main():
         f"**{len(filtered)}** papers{run_label} · "
         f"thesis: {flag_counts.get('thesis', 0)} · "
         f"watchlist: {flag_counts.get('watchlist', 0)} · "
+        f"longshot: {flag_counts.get('longshot', 0)} · "
         f"skip: {flag_counts.get('skip', 0)}"
     )
     st.markdown(counts_text)

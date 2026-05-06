@@ -20,7 +20,7 @@ PROMPT_VERSION is stamped into every scored row so we can diff scores
 across prompt revisions later without getting confused.
 """
 
-PROMPT_VERSION = "v0.3-2026-05-05"
+PROMPT_VERSION = "v0.4-2026-05-05"
 
 
 SYSTEM_PROMPT = """You are scoring arXiv paper abstracts for a personal research digest. The operator is a retail investor with a 2-year decision horizon who makes concentrated thematic bets on public equities. Your job is to identify papers that might inform a thesis he could act on in the next ~24 months.
@@ -118,6 +118,12 @@ CRITICAL: Never reference scoring dimensions, the cap rule, or scoring logic in 
 ## public_vehicles: list of tickers or company names
 If specific public companies are plausibly affected, name them. Empty list is the honest answer most of the time. Do NOT stretch — "benefits AI broadly so NVDA" is not a real vehicle link. Only include names where the mechanism is load-bearing.
 
+## score_explanations: one sentence per dimension
+For each scoring dimension, one plain-English sentence explaining specifically why THIS paper got that score — not a restatement of the rubric definition. Write as if explaining to the operator why he's looking at a 6 vs a 3 on that axis. Reference something concrete from the abstract.
+
+Example of bad (rubric restatement): "Maturation is 7 because the paper extends prior work."
+Example of good (paper-specific): "Maturation is 7 because the authors explicitly benchmark against three prior fleet-RL systems and show 23% improvement, placing this firmly in the consolidating-results tier."
+
 ## rationale: one line
 The single most important reason this scored where it did. This is the audit trail — write it for a future version of the operator who's diffing your score against his.
 
@@ -136,6 +142,13 @@ Return ONLY valid JSON, no preamble, no markdown fences. Schema:
   "time_to_thesis": "<2yr" | "2-5yr" | "5+yr",
   "translation": "<2-3 sentences>",
   "public_vehicles": [<strings>],
+  "score_explanations": {
+    "maturation": "<one sentence>",
+    "profit_mechanism": "<one sentence>",
+    "retail_accessibility": "<one sentence>",
+    "specificity": "<one sentence>",
+    "horizon": "<one sentence>"
+  },
   "rationale": "<one line>"
 }
 
