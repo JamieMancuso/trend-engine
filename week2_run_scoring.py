@@ -75,7 +75,7 @@ MAX_RETRIES = 3              # on transient API failure
 # ---- SCHEMA -----------------------------------------------------------------
 # The fields we expect the LLM to return (from the prompt spec).
 EXPECTED_JSON_KEYS = {
-    "maturation", "profit_mechanism", "retail_accessibility", "specificity",
+    "maturation", "profit_mechanism", "retail_accessibility", "specificity", "horizon",
     "final", "flag", "time_to_thesis", "translation", "public_vehicles", "rationale",
 }
 
@@ -86,7 +86,7 @@ OUTPUT_COLUMNS = [
     "id", "domain", "title", "abstract", "url", "published",
     # LLM sub-scores
     "llm_maturation", "llm_profit_mechanism", "llm_retail_accessibility",
-    "llm_specificity", "llm_final",
+    "llm_specificity", "llm_horizon", "llm_final",
     # LLM extras
     "llm_flag", "llm_time_to_thesis", "llm_translation",
     "llm_public_vehicles", "llm_rationale",
@@ -276,6 +276,7 @@ def score_paper(client: Anthropic, paper: dict, model: str) -> dict:
         "llm_profit_mechanism":      parsed["profit_mechanism"],
         "llm_retail_accessibility":  parsed["retail_accessibility"],
         "llm_specificity":           parsed["specificity"],
+        "llm_horizon":               parsed["horizon"],
         "llm_final":                 parsed["final"],
         # LLM extras
         "llm_flag":             parsed["flag"],

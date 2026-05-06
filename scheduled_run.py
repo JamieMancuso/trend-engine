@@ -89,7 +89,7 @@ def run_score() -> None:
     from week2_run_scoring import (
         load_papers, load_all_scored_ids, load_already_scored,
         score_paper, OUTPUT_COLUMNS, DEFAULT_MODEL, PROMPT_VERSION,
-        MODEL_PRICING, estimate_cost, API_SLEEP_SECONDS,
+        MODEL_PRICING, API_SLEEP_SECONDS,
     )
     from anthropic import Anthropic
     import csv

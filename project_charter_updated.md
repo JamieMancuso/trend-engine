@@ -246,6 +246,7 @@ These are the rules of engagement to get maximum leverage from AI in this projec
 | 2026-05-05 | Multi-run digest mode added to week4_digest.py | Sidebar toggle merges all results_*.csv, deduplicates by paper ID (latest score wins), shows "X runs merged" in counts header. Single-file mode unchanged. |
 | 2026-05-05 | run_pipeline.py built — fetch → score → digest in one command | Chains three stages via subprocess; halts on non-zero exit code; supports --limit, --skip-fetch, --no-browser, --dry-run. Replaces the manual 3-step run workflow. |
 | 2026-05-05 | Global dedup added to week2_run_scoring.py | Scorer now loads all previously scored IDs from every results_*.csv before each run and skips them automatically. 7-day fetch window means ~90% of papers in a given fetch were already scored; dedup drops a typical run from ~200 papers to ~20-30 genuinely new ones. |
+| 2026-05-05 | Scoring rubric promoted to v0.3 — Horizon score + longshot flag added | New Horizon axis (1-10) scores the long-term transformative ceiling of the topic area independent of near-term actionability. New "longshot" flag (alongside thesis/watchlist/skip) for papers with high Horizon but low near-term actionability — 5-20yr hold signal. Digest shows HRZ pill in green, longshot badge in deep green. Old scored rows missing llm_horizon display gracefully (pill hidden). |
 
 ## 10. Current Status & Next Actions
 

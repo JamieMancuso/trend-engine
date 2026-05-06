@@ -61,6 +61,7 @@ DEFAULT_SORT = "Final score (high → low)"
 FLAG_COLORS = {
     "thesis":    {"bg": "#7c2d12", "fg": "#fed7aa"},   # deep amber
     "watchlist": {"bg": "#1e293b", "fg": "#cbd5e1"},   # slate
+    "longshot":  {"bg": "#1e3a2f", "fg": "#6ee7b7"},   # deep green — long horizon
     "skip":      {"bg": "#27272a", "fg": "#71717a"},   # muted graphite
 }
 
@@ -118,7 +119,7 @@ def _normalize(df: pd.DataFrame) -> pd.DataFrame:
     # Coerce numeric columns — pandas reads them as int/float automatically
     # but we guard against the occasional cell that comes through as string.
     for col in ("llm_maturation", "llm_profit_mechanism", "llm_retail_accessibility",
-                "llm_specificity", "llm_final"):
+                "llm_specificity", "llm_horizon", "llm_final"):
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
@@ -200,28 +201,42 @@ SUBSCORE_TOOLTIPS = {
         "Mid (4-6): Some benchmarks but claims are hedged or limited. "
         "High (7-10): Specific quantitative improvements against named baselines, reproducible methodology."
     ),
+    "HRZ": (
+        "Horizon — Long-term transformative ceiling of the TOPIC AREA, not this specific paper. "
+        "Score the domain's potential if it fully succeeds over 10-20 years. "
+        "Low (1-3): Narrow improvement to an existing tool — even full success doesn't move the needle at scale. "
+        "Mid (4-6): Meaningful but bounded — improves a large industry without restructuring it. "
+        "High (7-8): Reshapes a major sector or creates a large new one. E.g. humanoid robotics, solid-state batteries, fusion. "
+        "Max (9-10): Civilizational-scale. E.g. AGI, asteroid mining, longevity escape velocity, brain-computer interfaces. "
+        "A high score here with low near-term actionability = 'longshot' flag, not skip."
+    ),
 }
 
 
 def render_subscores(row) -> str:
     """Compact row of sub-scores below the title. Hover each pill for the scoring definition."""
     parts = [
-        ("MAT",  int(row["llm_maturation"])),
-        ("PROF", int(row["llm_profit_mechanism"])),
-        ("RET",  int(row["llm_retail_accessibility"])),
-        ("SPEC", int(row["llm_specificity"])),
+        ("MAT",  int(row["llm_maturation"]),  False),
+        ("PROF", int(row["llm_profit_mechanism"]), False),
+        ("RET",  int(row["llm_retail_accessibility"]), False),
+        ("SPEC", int(row["llm_specificity"]), False),
+        # HRZ is horizon — rendered with green tint to signal it's a different axis
+        ("HRZ",  int(row["llm_horizon"]) if "llm_horizon" in row and pd.notna(row.get("llm_horizon")) else None, True),
     ]
     pills = []
-    for label, val in parts:
-        # Subtle color hint: dim sub-scores under 4 to make weak axes visible.
+    for label, val, is_horizon in parts:
+        if val is None:
+            continue   # skip HRZ for older scored rows that predate v0.3
         opacity = "0.45" if val < 4 else "0.95"
         tooltip = SUBSCORE_TOOLTIPS.get(label, "").replace('"', "&quot;")
+        # Horizon pill gets a subtle green background to distinguish it visually
+        bg = "rgba(52,120,80,0.18)" if is_horizon else "rgba(120,120,140,0.12)"
         pills.append(f"""
             <span title="{tooltip}" style="
                 display: inline-block;
                 padding: 3px 10px;
                 margin-right: 6px;
-                background: rgba(120,120,140,0.12);
+                background: {bg};
                 border-radius: 999px;
                 font-family: 'JetBrains Mono', monospace;
                 font-size: 12px;
@@ -400,11 +415,11 @@ def main():
         "Domains", all_domains, default=all_domains,
     )
 
-    # Flag multiselect — default to thesis + watchlist (skip is the noise tier)
-    all_flags = ["thesis", "watchlist", "skip"]
+    # Flag multiselect — default to thesis + watchlist + longshot (skip is the noise tier)
+    all_flags = ["thesis", "watchlist", "longshot", "skip"]
     selected_flags = st.sidebar.multiselect(
-        "Flags", all_flags, default=["thesis", "watchlist"],
-        help="thesis = act today · watchlist = revisit in 3-6 months · skip = noise",
+        "Flags", all_flags, default=["thesis", "watchlist", "longshot"],
+        help="thesis = act today · watchlist = revisit in 3-6 months · longshot = high horizon, 5-20yr hold · skip = noise",
     )
 
     # Min final score
