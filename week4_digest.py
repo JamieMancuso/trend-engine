@@ -277,8 +277,9 @@ def render_card(row) -> None:
                            f"{row.get('model', '?')} · "
                            f"id `{row['id']}`")
 
-            # Footer
-            st.markdown(render_footer(row), unsafe_allow_html=True)
+        # Footer rendered outside the column so unsafe_allow_html is always honoured.
+        # Some Streamlit versions silently ignore it inside st.columns contexts.
+        st.markdown(render_footer(row), unsafe_allow_html=True)
 
         # Soft separator between cards
         st.markdown(
