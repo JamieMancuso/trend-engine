@@ -173,8 +173,38 @@ def render_score_badge(final: float, flag: str) -> str:
     """
 
 
+SUBSCORE_TOOLTIPS = {
+    "MAT": (
+        "Maturation — Does this read like consolidating work (high) or first-discovery novelty (low)? "
+        "Low (1-3): 'We introduce / propose a novel framework.' "
+        "Mid (4-6): Solid incremental result, trend unclear. "
+        "High (7-10): 'We confirm / extend prior work' — explicitly the Nth result on an established line."
+    ),
+    "PROF": (
+        "Profit Mechanism — Is there an identifiable someone who makes money, and how? "
+        "Low (1-3): Pure theory, OR benefit diffuses across the industry with no pricing power for any single player. "
+        "Mid (4-6): Plausible path but speculative, or benefit captured only by diversified giants. "
+        "High (7-10): Explicit value-capture mechanism — a process sold, a device with a moat, a named beneficiary. "
+        "Note: 'used by lots of companies' scores LOW — commodity enablers don't create pricing power."
+    ),
+    "RET": (
+        "Retail Accessibility — Can a retail investor actually bet on this via a public vehicle? "
+        "Low (1-3): Benefits only private companies, labs, or conglomerates where the signal is swamped (e.g. GOOGL). "
+        "Mid (4-6): Sector ETF or crowded mid-caps — signal is real but diluted. "
+        "High (7-10): Clean pure-play — one or two public names where this paper's mechanism is load-bearing. "
+        "HARD RULE: If this score is under 4, final score caps at 5 and flag cannot be 'thesis'."
+    ),
+    "SPEC": (
+        "Specificity — Is the claim concrete enough to be load-bearing? "
+        "Low (1-3): Vague direction, no numbers, survey-like. "
+        "Mid (4-6): Some benchmarks but claims are hedged or limited. "
+        "High (7-10): Specific quantitative improvements against named baselines, reproducible methodology."
+    ),
+}
+
+
 def render_subscores(row) -> str:
-    """Compact row of sub-scores below the title."""
+    """Compact row of sub-scores below the title. Hover each pill for the scoring definition."""
     parts = [
         ("MAT",  int(row["llm_maturation"])),
         ("PROF", int(row["llm_profit_mechanism"])),
@@ -185,8 +215,9 @@ def render_subscores(row) -> str:
     for label, val in parts:
         # Subtle color hint: dim sub-scores under 4 to make weak axes visible.
         opacity = "0.45" if val < 4 else "0.95"
+        tooltip = SUBSCORE_TOOLTIPS.get(label, "").replace('"', "&quot;")
         pills.append(f"""
-            <span style="
+            <span title="{tooltip}" style="
                 display: inline-block;
                 padding: 3px 10px;
                 margin-right: 6px;
@@ -195,6 +226,7 @@ def render_subscores(row) -> str:
                 font-family: 'JetBrains Mono', monospace;
                 font-size: 12px;
                 opacity: {opacity};
+                cursor: help;
             "><b>{label}</b> {val}</span>""")
     return f'<div style="margin: 6px 0 14px 0;">{"".join(pills)}</div>'
 
