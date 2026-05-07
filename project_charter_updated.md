@@ -149,14 +149,15 @@ The reference example: catching something like the 2017 "Attention Is All You Ne
 | :---- | :---- | :---- |
 | 1 | Fetch papers from 8 domains → dated CSV snapshots | ✅ DONE |
 | 2 | LLM scoring: prompt design + hand-scored eval set + API wiring + eval run | ✅ DONE |
-| 3 | Add Semantic Scholar citation velocity (critical for 2yr horizon) | 🟡 Deferred to Week 5 — digest UX prioritized |
+| 3 | Add Semantic Scholar citation velocity (critical for 2yr horizon) | 🟡 Deferred indefinitely — fresh papers have no citations at fetch time |
 | 4 | Streamlit digest (cards, filters, score badges) — local first | ✅ DONE |
-| 5 | Light-mode fix · GitHub deploy · prompt caching · Semantic Scholar · **Day 45 checkpoint** | Next |
-| 6 | Add bioRxiv + medRxiv + Hacker News + lab/company research blogs | Not started |
-| 7 | Automation (Cowork or GitHub Actions) — move from "script I run" to real tool | Not started |
-| 8 | Use the system. Tune. Kill features that don't earn their keep. | Not started |
-| 9–13 | STRETCH: Draft 1–2 investment theses from system-surfaced signals | Gated on Day 45 |
-| Later | Vector embeddings / Streamlit dashboard / analytics layer — only if earned | Deferred |
+| 5 | Prompt caching · GitHub deploy · multi-run digest · pipeline runner · global dedup · Horizon score · longshot flag · per-score explanations · detail page · Windows Task Scheduler automation | ✅ DONE |
+| 6 | Analytics dashboard — trend velocity, domain heat, watchlist revisit across scored corpus | Next |
+| 7 | News layer scoping + first source (Hacker News or company blogs) — see §11 vision note | Not started |
+| 8 | Broader news/FT-replacement layer: trade press, RSS, structured summarization | Not started |
+| 9 | Use the system. Tune. Kill features that don't earn their keep. | Not started |
+| 10–13 | STRETCH: Draft 1–2 investment theses from system-surfaced signals | Gated on Day 45 (~June 1) |
+| Later | Vector embeddings / SQLite migration — only if CSV querying causes real friction | Deferred |
 
 ## 8. Working Principles with Claude
 
@@ -279,18 +280,56 @@ These are the rules of engagement to get maximum leverage from AI in this projec
 - Cowork file-maintenance agent now points at the project folder; handles post-session charter updates so closeout docs flow into §9 / §10 automatically
 - Pipeline ergonomics: refetch + score takes ~15 min wall time and ~$3 at current settings; well within budget
 
-### Next concrete actions (Week 5)
+### Week 5 outcomes (2026-05-05 session)
 
-1. ✅ **Prompt caching enabled** in `week2_run_scoring.py` — verified working; per-run cost target ~$0.80 vs prior $2.83.
-2. ✅ **Multi-run digest mode** — sidebar "Merge all runs" toggle in `week4_digest.py`; deduplicates by paper ID, latest score wins.
-3. ✅ **`run_pipeline.py`** — one command replaces manual 3-step workflow; supports --limit, --skip-fetch, --no-browser, --dry-run.
-4. ~~Semantic Scholar citation velocity~~ — **Deferred indefinitely.** Fresh papers have no citations at fetch time.
-5. **Day 45 checkpoint** (≈ June 1) — first real digest day was May 4. Keep running every other day and let signal accumulate. Go/no-go on thesis stretch at Day 45.
-6. **Use the system.** Daily habit: `py -3.14 run_pipeline.py` every other day, open digest, flag anything interesting. Reps matter more than new features right now.
+All Week 5 items shipped:
+- ✅ Prompt caching (~90% cost reduction on system prompt)
+- ✅ Multi-run digest mode (merge all CSVs, deduplicate by ID)
+- ✅ `run_pipeline.py` — one command for full fetch → score → digest
+- ✅ Global dedup in scorer — skips previously scored papers automatically
+- ✅ Windows Task Scheduler automation — runs every 2 days at 9pm
+- ✅ Scoring rubric v0.3 — Horizon score (1-10) + longshot flag
+- ✅ Scoring rubric v0.4 — per-score explanations in JSON output
+- ✅ Digest detail page — click any title for full score breakdown with definitions + paper-specific explanations
+- ✅ Top 11 papers rescored with v0.4 — Fleet-Scale RL upgraded to thesis (7.0)
+
+### Next concrete actions (Week 6)
+
+1. **Commit and push all Week 5 changes** — `git add -A` covers everything.
+2. **Verify Windows Task Scheduler** — confirm "Start in" path is correct; test manual run.
+3. **Analytics dashboard** — query across all scored CSVs: domain heat map, flag distribution over time, top papers by Horizon score, watchlist aging. Build as a second Streamlit page or separate script.
+4. **Full corpus re-score (v0.4)** — once prompt is confirmed stable after a few more runs, re-score the 200+ existing papers to backfill Horizon + score_explanations. Not urgent.
+5. **Day 45 checkpoint** (≈ June 1) — go/no-go on thesis stretch goal. Fleet-Scale RL (SYM/TER) is a candidate. Does it feel actionable after a few more weeks of signal?
+6. **News layer scoping** — see §11 vision note. Decide: what does "one source for everything" concretely mean before touching code.
 
 ## 11. Open Questions / Parking Lot
 
 *Things worth revisiting but not blocking current work.*
+
+### Vision note — "FT in aggregate" (logged 2026-05-05)
+
+Operator wants Trend Engine to grow into a single personal intelligence dashboard covering both research signals (current arXiv pipeline) and broader current events / world news. The goal is to recreate the Financial Times in aggregate — high-signal, curated, investment and career relevant — using open sources rather than a subscription.
+
+**What this means architecturally:**
+- Two distinct content types: (1) research papers — structured, scoreable with current rubric; (2) news/commentary — unstructured, needs lighter-touch summarization + tagging rather than full investment scoring.
+- Not everything needs the full 5-axis score. News items need: source, headline, 2-sentence summary, relevance tag (investing / macro / tech / career), and maybe a simple 1-5 signal strength rating.
+- UI implication: probably two tabs in the digest — "Research" (current) and "News" (new). Same aesthetic, different card format.
+
+**Candidate sources for news layer (in priority order):**
+1. Hacker News API — free, no auth, high signal-to-noise for tech
+2. Company/lab research blogs — DeepMind, OpenAI, Anthropic, Meta FAIR, Microsoft Research
+3. VC blogs — a16z, Sequoia, USV (RSS available)
+4. Reddit via PRAW — r/MachineLearning, r/investing, r/localllama
+5. arXiv-adjacent: bioRxiv, medRxiv (when health/bio coverage matters)
+6. FT/WSJ RSS — partial coverage without subscription; worth testing
+
+**Open questions before building:**
+- Does news get investment-scored or just summarized? (Scoring adds cost + complexity)
+- How do we handle paywalls on FT/WSJ/Nature?
+- What's the refresh cadence for news vs. research (hourly? daily?)?
+- Does the analytics dashboard cover news items too, or research only?
+
+**Build trigger:** after analytics dashboard ships and digest has been in daily use for 4+ weeks. Don't build the news layer until the research layer is genuinely habit-forming.
 
 - Should we eventually track GitHub trending repos as a signal? (Paper → code velocity is a leading indicator.)
 - Do we need a "watchlist" of specific researchers/labs whose output always gets flagged?
