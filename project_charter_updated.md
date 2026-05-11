@@ -2,7 +2,7 @@
 
 *This document is the single source of truth for the project. It lives in the Claude Project knowledge base and is loaded at the start of every conversation. Update it as decisions get made.*
 
-*Last updated: 2026-05-04 • Owner: Jamie Mancuso*
+*Last updated: 2026-05-07 • Owner: Jamie Mancuso*
 
 ## 1. Mission / North Star
 
@@ -152,8 +152,8 @@ The reference example: catching something like the 2017 "Attention Is All You Ne
 | 3 | Add Semantic Scholar citation velocity (critical for 2yr horizon) | 🟡 Deferred indefinitely — fresh papers have no citations at fetch time |
 | 4 | Streamlit digest (cards, filters, score badges) — local first | ✅ DONE |
 | 5 | Prompt caching · GitHub deploy · multi-run digest · pipeline runner · global dedup · Horizon score · longshot flag · per-score explanations · detail page · Windows Task Scheduler automation | ✅ DONE |
-| 6 | Analytics dashboard — trend velocity, domain heat, watchlist revisit across scored corpus | Next |
-| 7 | News layer scoping + first source (Hacker News or company blogs) — see §11 vision note | Not started |
+| 6 | Analytics dashboard — trend velocity, domain heat, watchlist revisit across scored corpus | ✅ DONE |
+| 7 | News layer scoping (no code yet — architecture locked, build trigger defined) | ✅ Scoped 2026-05-07 |
 | 8 | Broader news/FT-replacement layer: trade press, RSS, structured summarization | Not started |
 | 9 | Use the system. Tune. Kill features that don't earn their keep. | Not started |
 | 10–13 | STRETCH: Draft 1–2 investment theses from system-surfaced signals | Gated on Day 45 (~June 1) |
@@ -250,21 +250,31 @@ These are the rules of engagement to get maximum leverage from AI in this projec
 | 2026-05-05 | Scoring rubric promoted to v0.3 — Horizon score + longshot flag added | New Horizon axis (1-10) scores the long-term transformative ceiling of the topic area independent of near-term actionability. New "longshot" flag for papers with high Horizon but low near-term actionability — 5-20yr hold signal. |
 | 2026-05-05 | Scoring rubric promoted to v0.4 — per-score explanations added | New score_explanations JSON object in prompt output: one paper-specific sentence per dimension explaining why this paper got that score. Stored in llm_score_explanations column. Powers the new detail page in the digest. |
 | 2026-05-05 | Digest detail page added — click any paper title to open | Shows full score breakdown: each axis with rubric definition + paper-specific explanation. Implemented via st.session_state.selected_id; back button returns to card list. Works with or without score_explanations (older rows show definition only). | New Horizon axis (1-10) scores the long-term transformative ceiling of the topic area independent of near-term actionability. New "longshot" flag (alongside thesis/watchlist/skip) for papers with high Horizon but low near-term actionability — 5-20yr hold signal. Digest shows HRZ pill in green, longshot badge in deep green. Old scored rows missing llm_horizon display gracefully (pill hidden). |
+| 2026-05-07 | Multi-page Streamlit setup: digest as home, analytics in `pages/` | Native Streamlit pattern; one URL, sibling pages. No nav code needed — Streamlit auto-renders sidebar links. |
+| 2026-05-07 | Analytics dashboard avoids matplotlib dep — uses `ProgressColumn` for heat cues instead of `background_gradient` | Keeps deploy footprint minimal; Streamlit Cloud already has streamlit/pandas, no extra installs. |
+| 2026-05-07 | Task Scheduler env-var fix: `setx ANTHROPIC_API_KEY` at User scope | Non-interactive logon context doesn't inherit shell env; permanent user-scope var fixes the silent `Last Result: 2` failure mode. |
+| 2026-05-07 | Don't manually fire scheduled task near its scheduled time | Two `scheduled_run.py` instances racing for the git index lock will produce `Last Result: 128` (fatal git error) even when scoring succeeds. Use `run_pipeline.py` for ad-hoc runs instead. |
+| 2026-05-07 | News layer rubric scoped: separate 3-axis schema (signal_strength, investment_relevance, tag) — not paper rubric | Paper rubric's Maturation/Profit_Mechanism don't apply to articles; forcing them would produce noise scores. Lighter rubric also justifies cheaper model. |
+| 2026-05-07 | News layer model: Haiku 4.5, not Sonnet | ~10× cheaper, fine for short summaries; mixed-model pricing across content types is acceptable complexity. |
+| 2026-05-07 | News layer build trigger: 14 days × 15 min digest use + 1 named missed-decision | Without demand signal, news layer is feature creep dressed up as ambition. Hard gate prevents premature build. |
 
 ## 10. Current Status & Next Actions
 
-**Phase:** End of Week 4.5 — digest deployed and Cowork file-maintenance agent live. Week 4 shipped the local Streamlit digest; Week 4.5 (this session) closed out items 1–2 of the original Week 5 list — dark-mode lock and GitHub + Streamlit Cloud deploy — plus stood up Cowork against the project folder. Week 5 proper now opens with prompt caching, then Semantic Scholar citation velocity. Day 45 checkpoint follows.
+**Phase:** End of Week 6 — analytics dashboard shipped, news layer scoped, Task Scheduler verified working. Week 5 outcomes (prompt caching, multi-run digest, run_pipeline.py, global dedup, scheduler automation, scoring rubric v0.3 + v0.4, detail page) all in production. Week 6 added the cross-corpus analytics view and locked in the news-layer architecture without touching code. Next milestone is the Day 45 go/no-go on the thesis stretch goal (~June 1).
 
 **Working files:**
-- `week1_arxiv_fetcher.py` — patched: emits arXiv ID per paper, RECENCY_DAYS=7
-- `week2_scoring_prompt_v02.py` — stable
-- `week2_run_scoring.py` — prompt caching enabled (cache_control=ephemeral on system prompt); output CSV gains cache_write_tokens + cache_read_tokens columns
+- `week1_arxiv_fetcher.py` — emits arXiv ID per paper, RECENCY_DAYS=7
+- `week2_scoring_prompt_v02.py` — stable, v0.4 (Horizon + per-score explanations)
+- `week2_run_scoring.py` — prompt caching enabled, global dedup across all results_*.csv
 - `week2_compare_scores.py` — comparison/divergence analyzer
-- `week4_digest.py` — multi-run mode added: sidebar toggle merges all results_*.csv, deduplicates by paper ID
-- `run_pipeline.py` — NEW: one command fetch → score → digest (--limit, --skip-fetch, --no-browser, --dry-run)
+- `week4_digest.py` — home page; cards, multi-run merge, detail page
+- `pages/2_Analytics.py` — NEW: cross-corpus dashboard (KPI strip, domain heat, flag-over-time, top by Horizon, watchlist aging)
+- `run_pipeline.py` — one command fetch → score → digest (`--limit`, `--skip-fetch`, `--no-browser`, `--dry-run`)
+- `scheduled_run.py` — headless variant for Task Scheduler; in-process, no browser
 - `.streamlit/config.toml` — forces dark theme for all viewers
 - `eval_set_v1.xlsx` / `eval_set_v1__Scoring.csv` — hand-scored eval set
 - `clean_latex.py` — utility for human-facing abstract rendering
+- `week6_news_layer_scoping.md` — NEW: architectural plan for the news layer; build-trigger gated
 
 **Deployment:** Public GitHub repo `JamieMancuso/trend-engine`. Streamlit Cloud free tier, Python 3.14, live at `trend-engine-76lmj4cwezv3p7jhctym3s.streamlit.app`. CSVs commit to repo so each scoring run auto-redeploys via git push.
 
@@ -293,14 +303,23 @@ All Week 5 items shipped:
 - ✅ Digest detail page — click any title for full score breakdown with definitions + paper-specific explanations
 - ✅ Top 11 papers rescored with v0.4 — Fleet-Scale RL upgraded to thesis (7.0)
 
-### Next concrete actions (Week 6)
+### Week 6 outcomes (2026-05-06 → 2026-05-07 session)
 
-1. **Commit and push all Week 5 changes** — `git add -A` covers everything.
-2. **Verify Windows Task Scheduler** — confirm "Start in" path is correct; test manual run.
-3. **Analytics dashboard** — query across all scored CSVs: domain heat map, flag distribution over time, top papers by Horizon score, watchlist aging. Build as a second Streamlit page or separate script.
-4. **Full corpus re-score (v0.4)** — once prompt is confirmed stable after a few more runs, re-score the 200+ existing papers to backfill Horizon + score_explanations. Not urgent.
-5. **Day 45 checkpoint** (≈ June 1) — go/no-go on thesis stretch goal. Fleet-Scale RL (SYM/TER) is a candidate. Does it feel actionable after a few more weeks of signal?
-6. **News layer scoping** — see §11 vision note. Decide: what does "one source for everything" concretely mean before touching code.
+- ✅ Task Scheduler verified working — fixed silent `Last Result: 2` failure (env-var inheritance)
+- ✅ Analytics dashboard built (`pages/2_Analytics.py`) — KPI strip, domain heat, flag-over-time, top by Horizon, watchlist aging
+- ✅ Multi-page Streamlit setup — digest as home, analytics in `pages/`, both at same URL
+- ✅ Verified against real data: 256 unique papers, 295 scoring events, $3.81 cumulative cost, ~84% cache savings
+- ✅ News layer scoping doc — architectural decisions locked, hard build trigger defined
+- ✅ Identified Task Scheduler race condition: don't manually fire scheduled task within ~10 min of its scheduled time (git index lock collision produces `Last Result: 128`)
+
+### Next concrete actions (Week 7)
+
+1. **Use the system.** Daily/every-other-day digest review is the actual milestone now. Reps > new features. Track digest-use days against the news-layer build trigger (14 days × 15 min).
+2. **Day 45 checkpoint** (≈ June 1) — go/no-go on thesis stretch goal. Fleet-Scale RL (SYM/TER) at Final 7.0 / Horizon 8 is the leading candidate. Need a few more weeks of signal to judge.
+3. **Watchlist revisit affordance** — the analytics page surfaces aging watchlist items, but there's no UI to "promote to thesis" or "demote to skip" yet. Cheap to add; defer until aging chart shows enough items to demand it.
+4. **Cleanup:** delete `scheduled_run_restored.py` (identical duplicate of `scheduled_run.py`).
+5. **Full corpus re-score (v0.4)** — backfill Horizon + score_explanations on the 200+ pre-v0.4 papers. Not urgent.
+6. **News layer:** DO NOT BUILD until trigger is met. Re-read `week6_news_layer_scoping.md` before any work begins.
 
 ## 11. Open Questions / Parking Lot
 
