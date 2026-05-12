@@ -68,16 +68,40 @@ FLAG_COLORS = {
 
 # ---- DATA LOADING ----------------------------------------------------------
 
-def _sort_by_mtime(paths: list[str]) -> list[str]:
-    """Sort paths oldest → newest by file modification time.
+import re as _re   # local-scoped re; we only need it in the sort key
 
-    Why mtime, not filename: ad-hoc result files don't always follow the
-    `results_YYYY-MM-DD_HHMMSS.csv` pattern (e.g. `results_top11_rescore.csv`),
-    and alphabetical sort puts those AFTER date-named files because the prefix
-    after `results_` is `t` (which sorts after digits). mtime is robust to any
-    naming convention.
+# Match YYYY-MM-DD anywhere in the filename. Captures the date string.
+_DATE_IN_NAME = _re.compile(r"(\d{4}-\d{2}-\d{2})")
+
+
+def _sort_key(path: str) -> tuple:
+    """Sort key for results-CSV ordering.
+
+    Original attempt used os.path.getmtime, which works locally but FAILS on
+    Streamlit Cloud — a fresh `git clone` gives every file the same mtime,
+    so mtime sort becomes effectively random. Pure alphabetical sort fails
+    too: `results_top11_rescore.csv` sorts AFTER `results_2026-05-12_*.csv`
+    because `t` > digits.
+
+    The reliable signal is the date inside the filename. Extract it when
+    present; fall back to alpha-by-name for files without a date so the
+    order is deterministic. Undated files (e.g. `results_top11_rescore.csv`)
+    sort BEFORE dated files — treating them as "older than any timestamped
+    run" — so the latest dated file always wins as "latest run."
+    Returns (has_date_flag, date_or_name, name) for stable ordering.
     """
-    return sorted(paths, key=lambda p: os.path.getmtime(p))
+    basename = os.path.basename(path)
+    m = _DATE_IN_NAME.search(basename)
+    if m:
+        # has_date=1 → sorts after has_date=0 (undated)
+        return (1, m.group(1), basename)
+    return (0, basename, basename)
+
+
+def _sort_by_mtime(paths: list[str]) -> list[str]:
+    """Sort paths oldest → newest. Name-misleading wrapper kept for back-compat
+    with any callers; actual sort uses _sort_key (date-in-filename + alpha)."""
+    return sorted(paths, key=_sort_key)
 
 
 def find_latest_results() -> str | None:
