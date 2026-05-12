@@ -112,6 +112,11 @@ def parse_args() -> argparse.Namespace:
                    help="Score only first N papers (useful for smoke tests).")
     p.add_argument("--resume", action="store_true",
                    help="If output file exists, skip papers already scored.")
+    p.add_argument("--rescore-missing", action="store_true",
+                   help="Bypass global dedup — score papers even if they appear "
+                        "in a previous results_*.csv. Used for prompt-version backfills "
+                        "(e.g. re-scoring pre-v0.4 papers under the current rubric). "
+                        "--resume still applies to the current output file.")
     return p.parse_args()
 
 
@@ -325,7 +330,8 @@ def main() -> int:
     # Global dedup: skip any paper already scored in ANY previous results_*.csv.
     # This prevents re-scoring the same papers that fall in overlapping 7-day
     # fetch windows. Runs automatically — no flag needed.
-    globally_scored = load_all_scored_ids()
+    # --rescore-missing bypasses this; used for prompt-version backfills.
+    globally_scored = set() if args.rescore_missing else load_all_scored_ids()
 
     # --resume: additionally skip papers already in THIS run's output file.
     # Useful for resuming a run that crashed partway through.
@@ -338,6 +344,8 @@ def main() -> int:
     skipped_resume = len([p for p in papers if p["id"] in resume_scored - globally_scored])
 
     print(f"Input: {args.input} ({len(papers)} papers total)")
+    if args.rescore_missing:
+        print(f"  --rescore-missing: global dedup BYPASSED (forced re-scoring mode)")
     if skipped_global:
         print(f"  Skipped {skipped_global} already scored in previous runs")
     if skipped_resume:

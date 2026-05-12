@@ -2,7 +2,7 @@
 
 *This document is the single source of truth for the project. It lives in the Claude Project knowledge base and is loaded at the start of every conversation. Update it as decisions get made.*
 
-*Last updated: 2026-05-07 • Owner: Jamie Mancuso*
+*Last updated: 2026-05-11 • Owner: Jamie Mancuso*
 
 ## 1. Mission / North Star
 
@@ -257,24 +257,50 @@ These are the rules of engagement to get maximum leverage from AI in this projec
 | 2026-05-07 | News layer rubric scoped: separate 3-axis schema (signal_strength, investment_relevance, tag) — not paper rubric | Paper rubric's Maturation/Profit_Mechanism don't apply to articles; forcing them would produce noise scores. Lighter rubric also justifies cheaper model. |
 | 2026-05-07 | News layer model: Haiku 4.5, not Sonnet | ~10× cheaper, fine for short summaries; mixed-model pricing across content types is acceptable complexity. |
 | 2026-05-07 | News layer build trigger: 14 days × 15 min digest use + 1 named missed-decision | Without demand signal, news layer is feature creep dressed up as ambition. Hard gate prevents premature build. |
+| 2026-05-11 | Digest run-scope control: 3-way radio (Single file / Latest run only / All runs merged) replaces the merge-all toggle | Operator wanted a quick "what just landed" view without losing single-file or merged modes. Radio is mutually exclusive — fewer foot-guns than two booleans. Default set to "Latest run only" (most common workflow). |
+| 2026-05-11 | week2_run_scoring.py gains `--rescore-missing` flag | Bypasses global dedup so prompt-version backfills are possible (otherwise dedup blocks them). Used to backfill v0.4 Horizon + score_explanations on the May 4 / May 5 production runs. |
+| 2026-05-11 | v0.4 backfill: 199 papers from May 4 / May 5 production runs queued for re-scoring under v0.4 rubric | The May 6 fetch was a fresh batch, not a backfill — only 11 papers (top11_rescore.csv) overlap with the May 4 corpus. Backfill input written to `backfill_v04_input.csv`, run executed locally by operator. April eval-set papers excluded — calibration history, not signal. |
+| 2026-05-11 | News layer build trigger formally OVERRIDDEN — operator opted to ship despite gate not being met | Trigger was 14 days × 15 min digest use + 1 named missed decision. Operator chose to build now anyway. Earn-its-keep re-evaluation set for 30 days from first news run; if it isn't being read, deprecate. |
+| 2026-05-11 | News layer scope this session: fetcher + scorer only (no UI integration) | Tabbed digest UI + analytics page additions deferred to next session. Ships an end-to-end pipeline (fetch → score → CSV) without leaving UI half-built. |
+| 2026-05-11 | News scoring prompt v0.1 written: 3-axis schema (signal_strength, investment_relevance, tag) + flag + translation | Mirrors the scoping doc's Decision 1. Calibration anchors include OpenAI/Tim Cook/DOE/Boston Dynamics examples to illustrate flag thresholds. Will iterate after first real run shows where Haiku miscalibrates. |
+| 2026-05-11 | News IDs namespaced as `hn:<item_id>` (and `<source>:<id>` for future sources) | Prevents accidental collision with arXiv IDs in any merged view. Same dedup pattern as paper scorer — global scan across `news_results_*.csv`. |
+| 2026-05-11 | News scoring rubric promoted v0.1 → v0.2: added `market_impact` axis (1-10) | Operator flagged that political/macro news with market consequence was a known blind spot. Original 2-axis rubric (signal_strength + investment_relevance) under-weighted stories where the chain from policy/event → portfolio impact requires reasoning the operator might not do unprompted. New axis explicitly scores broad-market consequence regardless of personal-portfolio fit. Flag rule updated: `read = signal >=6 AND (relevance >=7 OR market_impact >=7)` — the OR catches macro stories the AND was filtering out. Translation field now required to walk the causal chain when market_impact >= 7 and exceeds investment_relevance. Output schema gains `llm_market_impact` column. |
+| 2026-05-11 | News source gap acknowledged — current pipeline is HN-only | HN is tech/startup-skewed and won't surface pure macro/political news. Building macro/political RSS fetcher (Reuters Politics, AP, Axios, etc.) deferred to next session — closes the source gap that the v0.2 rubric is now ready to score against. Doing the rubric upgrade first lets us see how Haiku handles the new axis on whatever HN does carry, before adding more sources. |
+| 2026-05-11 | First news run: 19 HN items, $0.057, 0 thesis-equivalent / 1 read / 4 skim / 14 skip | v0.2 rubric works mechanically — JSON parses, market_impact column populates, flag rule fires correctly. Single `read` was an AI-security story (sig=7/rel=6/mkt=7). Notably, today's HN top-30 contained zero pure macro/political stories — confirms the source gap. Rubric upgrade earned its keep on the one applicable item; broader value blocked on macro RSS fetcher. |
+| 2026-05-11 | Macro/political RSS fetcher built: `week7_news_fetcher_rss.py` (Reuters Top + Politics, AP Top + Politics, Fed press + speeches) | Closes the source gap the v0.2 market_impact axis was designed for. Same OUTPUT_COLUMNS as HN fetcher so `week7_news_scoring.py` runs unchanged on its output. Uses `feedparser` (already in stack via arxiv fetcher). 48h recency window matches research cadence. IDs namespaced `reuters:` / `ap:` / `fed:` to prevent collision with `hn:`. RSS popularity columns left blank. |
+| 2026-05-11 | Sources NOT included in first RSS cut: Axios | Operator picked Reuters + AP + Fed in clarification. Axios was offered but skipped — more editorial spin and noisier than wire services. Easy to add later by appending to FEEDS dict. |
+| 2026-05-11 | Digest split into Research / News tabs (`st.tabs()`) | Tabs over separate pages — review flow is "what's worth looking at today across everything," not "first research, then news." Each tab owns its own sidebar widgets (15 total, all keyed with `research_` / `news_` prefixes to avoid Streamlit's DuplicateWidgetID error). Detail page (paper click → full breakdown) still works inside the Research tab. |
+| 2026-05-11 | News card design: market_impact is the badge headline, not signal_strength | Operator's whole reason for adding market_impact was to surface stories he might overlook. Putting it as the big number on the card makes the eye go straight to it. SIG/REL/MKT all visible as smaller pills; MKT pill gets a blue tint matching the badge, distinguishing it from the rest. |
+| 2026-05-11 | News tab default filters: read+skim flags only, all sources, all tags, min market_impact=0 | Conservative default matches research tab pattern (hide skip by default). min_market=0 means "show everything not filtered by flag" — operator can crank it up to 7+ to see only macro stories. |
+| 2026-05-11 | Analytics page additions for news (signal/market_impact over time, source heat, tag distribution) deferred to next session | Per scoping: tabbed digest only this round. Analytics page additions are ~1 hour of focused work and can wait until news has accumulated 5+ runs of data worth charting. |
+| 2026-05-11 | RSS source set revised after first run discovered dead URLs | Reuters RSS (`feeds.reuters.com/*`) and AP RSS (`feeds.apnews.com/*`) both returned DNS failures — Reuters retired their public RSS years ago, AP restructured. Replaced with: (1) NPR Top + Politics RSS — active wire-quality alternative; (2) Reuters via Google News RSS query (`site:reuters.com`) — indirect proxy that works. Source keys: `npr`, `reuters_via_google`, `fed`. Digest's NEWS_SOURCE_LABELS updated to render the new keys with friendly names. Lesson: should have verified RSS URLs live before shipping; news org RSS is notoriously unstable. |
+| 2026-05-11 | Per-source recency window introduced (Fed: 7d, others: 48h) | Fed releases are 1-3/week; a 48h window caught 0 items on first run despite 35 entries fetched. Added `SOURCE_RECENCY_HOURS` override dict in `week7_news_fetcher_rss.py`. Pattern is generic — any future low-volume source can get its own override without touching the loop. |
+| 2026-05-11 | First RSS news run: 137 items (15 NPR + 117 Reuters-via-Google + 5 Fed), $0.45, ~30 reads | v0.2 market_impact axis validated on real macro/political content. Multiple `read` flags fired specifically because of the new OR-rule (rel < 7 but mkt >= 7) — Hormuz/oil-supply, Fed chair succession, China factory inflation, Trump-Iran. Pattern operator was missing under v0.1 is now being caught. Reuters-via-Google delivers ~88% of items by volume and dominates cost; if budget tightens, drop the second query. |
+| 2026-05-11 | News run cadence cost projection: ~$7/mo for news + ~$30/mo for research = ~$37/mo total | Within the $50/mo ceiling. Largest cost lever is the second Reuters-via-Google query (politics/economy) which roughly doubles RSS volume. Worth keeping for now since the macro coverage is the whole point. |
+| 2026-05-11 | Observed first-run miscalibration: rate-path news scoring at signal=6 boundary gets demoted to skim | Item #92 (BofA/Goldman pushing back Fed rate-cut expectations) scored sig=6/rel=6/mkt=7 → skim, when it should arguably be read. The flag rule's `signal >= 6` floor is borderline-correct here. Watch this pattern across 2-3 runs before tweaking — single observation isn't enough to retune. If it persists, consider lowering signal threshold in the OR clause to 5 for high-market_impact items, or adding a "consensus bank macro forecast" calibration anchor. |
 
 ## 10. Current Status & Next Actions
 
-**Phase:** End of Week 6 — analytics dashboard shipped, news layer scoped, Task Scheduler verified working. Week 5 outcomes (prompt caching, multi-run digest, run_pipeline.py, global dedup, scheduler automation, scoring rubric v0.3 + v0.4, detail page) all in production. Week 6 added the cross-corpus analytics view and locked in the news-layer architecture without touching code. Next milestone is the Day 45 go/no-go on the thesis stretch goal (~June 1).
+**Phase:** Mid Week 7 — digest gained 3-way run-scope control, scorer gained `--rescore-missing` flag, v0.4 backfill executed on 199 pre-v0.4 production papers, news-layer pipeline shipped end-to-end (HN fetcher + macro RSS fetcher + Haiku scorer with v0.2 rubric including market_impact axis + tabbed digest UI). News-layer build trigger formally overridden — 30-day earn-its-keep checkpoint set for ~June 10. Analytics page additions for news deferred. Day 45 thesis go/no-go still ~June 1.
 
 **Working files:**
 - `week1_arxiv_fetcher.py` — emits arXiv ID per paper, RECENCY_DAYS=7
 - `week2_scoring_prompt_v02.py` — stable, v0.4 (Horizon + per-score explanations)
-- `week2_run_scoring.py` — prompt caching enabled, global dedup across all results_*.csv
+- `week2_run_scoring.py` — prompt caching enabled, global dedup, `--rescore-missing` for backfills
 - `week2_compare_scores.py` — comparison/divergence analyzer
-- `week4_digest.py` — home page; cards, multi-run merge, detail page
-- `pages/2_Analytics.py` — NEW: cross-corpus dashboard (KPI strip, domain heat, flag-over-time, top by Horizon, watchlist aging)
-- `run_pipeline.py` — one command fetch → score → digest (`--limit`, `--skip-fetch`, `--no-browser`, `--dry-run`)
-- `scheduled_run.py` — headless variant for Task Scheduler; in-process, no browser
-- `.streamlit/config.toml` — forces dark theme for all viewers
+- `week4_digest.py` — home page; Research/News tabs (`st.tabs()`). Research tab: cards, 3-way run-scope, detail page. News tab: cards with market_impact-as-headline badge, source/tag/flag filters, market_impact slider.
+- `pages/2_Analytics.py` — cross-corpus dashboard
+- `run_pipeline.py` — one command fetch → score → digest
+- `scheduled_run.py` — headless variant for Task Scheduler
+- `.streamlit/config.toml` — forces dark theme
 - `eval_set_v1.xlsx` / `eval_set_v1__Scoring.csv` — hand-scored eval set
 - `clean_latex.py` — utility for human-facing abstract rendering
-- `week6_news_layer_scoping.md` — NEW: architectural plan for the news layer; build-trigger gated
+- `week6_news_layer_scoping.md` — architectural plan for the news layer
+- `week7_news_fetcher.py` — HN top-stories fetcher → news_hn_*.csv
+- `week7_news_fetcher_rss.py` — NEW: macro/political RSS fetcher (Reuters + AP + Fed) → news_rss_*.csv
+- `week7_news_scoring_prompt_v01.py` — 3-axis news rubric, currently at v0.2 (signal/relevance/market_impact + tag + flag + translation). Filename kept stable across versions; PROMPT_VERSION constant inside is the source of truth.
+- `week7_news_scoring.py` — Haiku-based news scorer with caching, dedup, `--rescore-missing`. v0.2 schema includes market_impact column.
+- `backfill_v04_input.csv` — 199 papers queued for v0.4 backfill rescore
 
 **Deployment:** Public GitHub repo `JamieMancuso/trend-engine`. Streamlit Cloud free tier, Python 3.14, live at `trend-engine-76lmj4cwezv3p7jhctym3s.streamlit.app`. CSVs commit to repo so each scoring run auto-redeploys via git push.
 
@@ -312,14 +338,18 @@ All Week 5 items shipped:
 - ✅ News layer scoping doc — architectural decisions locked, hard build trigger defined
 - ✅ Identified Task Scheduler race condition: don't manually fire scheduled task within ~10 min of its scheduled time (git index lock collision produces `Last Result: 128`)
 
-### Next concrete actions (Week 7)
+### Next concrete actions (Week 7+)
 
-1. **Use the system.** Daily/every-other-day digest review is the actual milestone now. Reps > new features. Track digest-use days against the news-layer build trigger (14 days × 15 min).
-2. **Day 45 checkpoint** (≈ June 1) — go/no-go on thesis stretch goal. Fleet-Scale RL (SYM/TER) at Final 7.0 / Horizon 8 is the leading candidate. Need a few more weeks of signal to judge.
-3. **Watchlist revisit affordance** — the analytics page surfaces aging watchlist items, but there's no UI to "promote to thesis" or "demote to skip" yet. Cheap to add; defer until aging chart shows enough items to demand it.
-4. **Cleanup:** delete `scheduled_run_restored.py` (identical duplicate of `scheduled_run.py`).
-5. **Full corpus re-score (v0.4)** — backfill Horizon + score_explanations on the 200+ pre-v0.4 papers. Not urgent.
-6. **News layer:** DO NOT BUILD until trigger is met. Re-read `week6_news_layer_scoping.md` before any work begins.
+1. **Run the v0.4 backfill** locally: `py -3.14 week2_run_scoring.py --input backfill_v04_input.csv --rescore-missing` (199 papers, ~10-15 min, est. $0.25-0.35 with caching). Verify the output CSV lands and the multi-run digest picks up the new Horizon scores on the previously-pre-v0.4 papers.
+2. **Run the news pipeline** locally for the first time: `py -3.14 week7_news_fetcher.py` then `py -3.14 week7_news_scoring.py --input news_hn_<timestamp>.csv`. Inspect the output for calibration drift — Haiku may need anchor adjustments after seeing real HN content.
+3. **Run the macro RSS fetcher locally** (one-time): `py -3.14 -m pip install feedparser --user` (if not already installed), then `py -3.14 week7_news_fetcher_rss.py`. Score the output with `py -3.14 week7_news_scoring.py --input news_rss_<timestamp>.csv`. Inspect the market_impact distribution — this is the first real test of whether macro/political news flows through the rubric correctly.
+4. **Refresh the digest in browser** to see the new Research/News tabs. The News tab will be empty until you've scored at least one news_rss_*.csv (HN-only news_results from earlier today should also show up).
+5. **News-layer analytics additions** (next session if news proves useful): signal/market_impact over time, source heat, tag distribution charts on `pages/2_Analytics.py`. ~1 hour.
+5. **Use the system.** Daily/every-other-day digest review is still the milestone. Reps > new features.
+6. **Day 45 checkpoint** (≈ June 1) — go/no-go on thesis stretch goal. Fleet-Scale RL (SYM/TER) at Final 7.0 / Horizon 8 leading candidate.
+7. **News layer earn-its-keep checkpoint:** 30 days from first news run — if news isn't being read, deprecate. Override of original build trigger needs to actually pay off.
+8. **Watchlist revisit affordance** — defer until analytics aging chart demands it.
+9. **Cleanup:** delete `scheduled_run_restored.py` (identical duplicate).
 
 ## 11. Open Questions / Parking Lot
 

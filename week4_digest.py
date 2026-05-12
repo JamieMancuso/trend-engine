@@ -79,6 +79,17 @@ def find_all_results() -> list[str]:
     return sorted(glob.glob(RESULTS_GLOB))
 
 
+# News pipeline produces news_results_*.csv. Schema is documented in
+# week7_news_scoring.py (OUTPUT_COLUMNS) — different shape from research,
+# so it gets its own loaders and renderers below.
+NEWS_RESULTS_GLOB = "news_results_*.csv"
+
+
+def find_all_news_results() -> list[str]:
+    """Return all news_results_*.csv files sorted oldest → newest."""
+    return sorted(glob.glob(NEWS_RESULTS_GLOB))
+
+
 @st.cache_data(show_spinner=False)
 def load_all_results(file_tuple: tuple[str, ...]) -> tuple[pd.DataFrame, int]:
     """
@@ -448,7 +459,476 @@ def render_card(row) -> None:
         )
 
 
+# ---- NEWS DATA + RENDERING -------------------------------------------------
+
+# Source-key labels and color tints for the source pill on news cards.
+# Keys must match what the fetchers write to the `source` column.
+NEWS_SOURCE_LABELS = {
+    "hackernews":         "HN",
+    "npr":                "NPR",
+    "reuters_via_google": "Reuters",
+    "fed":                "Fed",
+    # Legacy keys (in case earlier runs landed before the source rename)
+    "reuters":            "Reuters (legacy)",
+    "ap":                 "AP (legacy)",
+}
+
+# Flag colors for news cards. Different palette from research flags so the
+# eye doesn't conflate "thesis" with "read" (different action implications).
+NEWS_FLAG_COLORS = {
+    "read": {"bg": "#1e3a5f", "fg": "#bfdbfe"},   # deep blue — primary action
+    "skim": {"bg": "#1e293b", "fg": "#cbd5e1"},   # slate
+    "skip": {"bg": "#27272a", "fg": "#71717a"},   # graphite
+}
+
+
+def _normalize_news(df: pd.DataFrame) -> pd.DataFrame:
+    """Coerce types + parse dates for news_results_*.csv. Mirrors _normalize for research."""
+    for col in ("llm_signal_strength", "llm_investment_relevance", "llm_market_impact",
+                "hn_score", "hn_comments"):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+    # posted_at is ISO with timezone; coerce to NaT on bad values
+    df["posted_dt"] = pd.to_datetime(df.get("posted_at", ""), errors="coerce", utc=True)
+    df["posted_date"] = df["posted_dt"].dt.strftime("%Y-%m-%d %H:%M").fillna("")
+    # market_impact may be missing on v0.1 rows — fill with 0 so filters don't NaN-blow-up
+    if "llm_market_impact" not in df.columns:
+        df["llm_market_impact"] = 0
+    return df
+
+
+@st.cache_data(show_spinner=False)
+def load_news_results(path: str) -> pd.DataFrame:
+    """Load + normalize a single news_results_*.csv."""
+    return _normalize_news(pd.read_csv(path))
+
+
+@st.cache_data(show_spinner=False)
+def load_all_news_results(file_tuple: tuple[str, ...]) -> tuple[pd.DataFrame, int]:
+    """Merge all news CSVs, dedupe by ID (latest score wins). Returns (df, num_runs)."""
+    frames = []
+    for path in file_tuple:
+        try:
+            frames.append(pd.read_csv(path))
+        except Exception:
+            pass
+    if not frames:
+        return pd.DataFrame(), 0
+    combined = pd.concat(frames, ignore_index=True)
+    if "run_timestamp" in combined.columns:
+        combined = combined.sort_values("run_timestamp", ascending=True)
+    combined = combined.drop_duplicates(subset=["id"], keep="last").reset_index(drop=True)
+    return _normalize_news(combined), len(file_tuple)
+
+
+def render_news_score_badge(market_impact: int | float, flag: str) -> str:
+    """Big colored badge for news cards. The HEADLINE number is market_impact,
+    not signal_strength — that's the axis the operator added to catch macro
+    news that's easy to overlook."""
+    colors = NEWS_FLAG_COLORS.get(flag, NEWS_FLAG_COLORS["skip"])
+    val = int(market_impact) if pd.notna(market_impact) else 0
+    return f"""
+    <div style="
+        background: {colors['bg']};
+        color: {colors['fg']};
+        border-radius: 12px;
+        padding: 14px 18px;
+        text-align: center;
+        font-family: 'Georgia', serif;
+        min-width: 92px;
+    ">
+        <div style="font-size: 32px; font-weight: 700; line-height: 1;">{val}</div>
+        <div style="font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+                    opacity: 0.85; margin-top: 4px;">market</div>
+        <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+                    opacity: 0.85; margin-top: 2px;">{flag}</div>
+    </div>
+    """
+
+
+def render_news_subscores(row) -> str:
+    """Compact pills for the news axes: SIG / REL / MKT.
+    MKT also appears as the badge headline; showing it here too gives quick
+    cross-axis comparison without scanning back to the badge."""
+    parts = [
+        ("SIG", row.get("llm_signal_strength"),
+         "Signal Strength — quality of the story itself, regardless of fit. "
+         "1-3 noise/PR · 4-6 incremental · 7-8 substantive primary source · 9-10 paradigm shift"),
+        ("REL", row.get("llm_investment_relevance"),
+         "Investment Relevance — fit to operator's thesis space (AI/EV/batteries/semis/robotics). "
+         "1-3 unrelated · 4-6 sector-context · 7-8 named-name impact · 9-10 hard catalyst"),
+        ("MKT", row.get("llm_market_impact"),
+         "Market Impact — broad-market consequence regardless of personal fit. "
+         "Catches macro/political news where chain-of-reasoning to the portfolio is non-obvious."),
+    ]
+    pills = []
+    for label, val, tip in parts:
+        if val is None or pd.isna(val):
+            continue
+        v = int(val)
+        opacity = "0.45" if v < 4 else "0.95"
+        bg = "rgba(40,80,140,0.18)" if label == "MKT" else "rgba(120,120,140,0.12)"
+        tip_safe = tip.replace('"', "&quot;")
+        pills.append(f"""
+            <span title="{tip_safe}" style="
+                display: inline-block;
+                padding: 3px 10px;
+                margin-right: 6px;
+                background: {bg};
+                border-radius: 999px;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 12px;
+                opacity: {opacity};
+                cursor: help;
+            "><b>{label}</b> {v}</span>""")
+    return f'<div style="margin: 6px 0 14px 0;">{"".join(pills)}</div>'
+
+
+def render_news_footer(row) -> str:
+    """Source pill, posted timestamp, link out."""
+    src_key = row.get("source", "")
+    src_label = NEWS_SOURCE_LABELS.get(src_key, src_key)
+    posted = row.get("posted_date", "")
+    url = row.get("url", "")
+    tag = row.get("llm_tag", "")
+    return f"""
+    <div style="
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(120,120,140,0.18);
+        font-size: 12px;
+        color: #94a3b8;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 0;
+        align-items: center;
+    ">
+        <span style="background: rgba(40,80,140,0.18); color: #93c5fd;
+                     padding: 2px 8px; border-radius: 4px; font-family: monospace;
+                     font-size: 11px; margin-right: 12px;">{src_label}</span>
+        <span style="background: rgba(120,120,140,0.12); color: #cbd5e1;
+                     padding: 2px 8px; border-radius: 4px; font-family: monospace;
+                     font-size: 11px; margin-right: 12px;">#{tag}</span>
+        <span style="margin-right: 16px;">📅 {posted}</span>
+        <a href="{url}" target="_blank" style="color: #94a3b8; text-decoration: underline;">
+            open ↗
+        </a>
+    </div>
+    """
+
+
+def render_news_card(row) -> None:
+    """Render a single news item as a card. Mirrors the research card layout."""
+    with st.container():
+        st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
+        col_text, col_score = st.columns([8, 1.2])
+
+        with col_score:
+            st.markdown(
+                render_news_score_badge(row.get("llm_market_impact", 0), row.get("llm_flag", "skip")),
+                unsafe_allow_html=True,
+            )
+
+        with col_text:
+            # Tag/source row above the title — quick visual filter cue
+            st.markdown(
+                f'<div style="font-family: monospace; font-size: 11px; '
+                f'letter-spacing: 0.15em; color: #64748b; '
+                f'text-transform: uppercase; margin-bottom: 4px;">'
+                f'{NEWS_SOURCE_LABELS.get(row.get("source", ""), row.get("source", ""))}'
+                f' · {row.get("llm_tag", "")}'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+            # Title — plain link straight to source. No detail page yet
+            # for news (deferred); keeping it simple beats half-built.
+            url = row.get("url", "")
+            title = row.get("title", "")
+            st.markdown(
+                f'<div style="font-family: Georgia, serif; font-size: 18px; '
+                f'line-height: 1.35; font-weight: 600; margin-bottom: 4px;">'
+                f'<a href="{url}" target="_blank" style="color: #e2e8f0; text-decoration: none;">'
+                f'{title}</a></div>',
+                unsafe_allow_html=True,
+            )
+
+            st.markdown(render_news_subscores(row), unsafe_allow_html=True)
+
+            # Translation — the LLM's "why this matters" sentence
+            translation = row.get("llm_translation", "")
+            st.markdown(
+                f'<div style="font-size: 14px; line-height: 1.55; color: #cbd5e1;">'
+                f'{translation}</div>',
+                unsafe_allow_html=True,
+            )
+
+        st.markdown(render_news_footer(row), unsafe_allow_html=True)
+        st.markdown(
+            '<div style="margin-top: 24px; '
+            'border-bottom: 1px solid rgba(120,120,140,0.12);"></div>',
+            unsafe_allow_html=True,
+        )
+
+
 # ---- MAIN APP --------------------------------------------------------------
+
+def render_research_tab() -> None:
+    """The original digest body — research papers from results_*.csv.
+    Sidebar widgets are scoped here; the News tab has its own."""
+
+    st.sidebar.header("Source")
+
+    all_result_files = find_all_results()
+    if not all_result_files:
+        st.error("No results_*.csv found in the current directory. "
+                 "Run week2_run_scoring.py first.")
+        st.stop()
+
+    # Run-scope selector — three mutually exclusive views:
+    #   "Single file"      — pick any results_*.csv via the text box below
+    #   "Latest run only"  — pinned to the newest results_*.csv (what shipped today)
+    #   "All runs merged"  — every CSV combined, deduped by paper ID (latest score wins)
+    run_scope = st.sidebar.radio(
+        "Run scope",
+        options=["Single file", "Latest run only", "All runs merged"],
+        index=1,   # default: latest run — most common "what's new" use case
+        help=(
+            "Single file: choose any one CSV. "
+            "Latest run only: just the most recent scoring run. "
+            "All runs merged: cross-run best-of view, deduped by paper ID."
+        ),
+        key="research_run_scope",
+    )
+
+    num_runs = 1
+    multi_run = run_scope == "All runs merged"
+
+    if multi_run:
+        df, num_runs = load_all_results(tuple(all_result_files))
+        if df.empty:
+            st.error("Could not load any results files.")
+            st.stop()
+        st.sidebar.caption(f"Merged **{num_runs}** run(s) · **{len(df)}** unique papers")
+    elif run_scope == "Latest run only":
+        latest_path = all_result_files[-1]
+        df = load_results(latest_path)
+        st.sidebar.caption(f"Loaded **{len(df)}** papers from `{Path(latest_path).name}`")
+        if "run_timestamp" in df.columns and len(df) > 0:
+            st.sidebar.caption(f"Scored: {df['run_timestamp'].iloc[0]}")
+    else:
+        default_path = all_result_files[-1]
+        csv_path = st.sidebar.text_input("Results CSV", value=default_path,
+                                         help="Path to a results_*.csv file.",
+                                         key="research_csv_path")
+        if not Path(csv_path).exists():
+            st.error(f"File not found: {csv_path}")
+            st.stop()
+        df = load_results(csv_path)
+        st.sidebar.caption(f"Loaded **{len(df)}** papers from `{Path(csv_path).name}`")
+        if "run_timestamp" in df.columns and len(df) > 0:
+            st.sidebar.caption(f"Scored: {df['run_timestamp'].iloc[0]}")
+
+    # ---- Filters ----
+    st.sidebar.markdown("---")
+    st.sidebar.header("Filters")
+
+    all_domains = sorted(df["domain"].unique().tolist())
+    selected_domains = st.sidebar.multiselect(
+        "Domains", all_domains, default=all_domains, key="research_domains",
+    )
+
+    all_flags = ["thesis", "watchlist", "longshot", "skip"]
+    selected_flags = st.sidebar.multiselect(
+        "Flags", all_flags, default=["thesis", "watchlist", "longshot"],
+        help="thesis = act today · watchlist = revisit in 3-6 months · longshot = high horizon, 5-20yr hold · skip = noise",
+        key="research_flags",
+    )
+
+    min_final = st.sidebar.slider(
+        "Min final score", min_value=0.0, max_value=10.0,
+        value=DEFAULT_MIN_FINAL, step=0.5, key="research_min_final",
+    )
+
+    require_vehicle = st.sidebar.checkbox(
+        "Only papers with named public vehicle(s)", value=False,
+        help="Hides papers where the LLM couldn't name a public-equity exposure.",
+        key="research_require_vehicle",
+    )
+
+    sort_options = {
+        "Final score (high → low)": ("llm_final", False),
+        "Final score (low → high)": ("llm_final", True),
+        "Date (newest → oldest)":   ("published_dt", False),
+        "Date (oldest → newest)":   ("published_dt", True),
+        "Domain (A → Z)":           ("domain", True),
+    }
+    sort_choice = st.sidebar.selectbox("Sort by", list(sort_options.keys()),
+                                       index=0, key="research_sort")
+    sort_col, sort_asc = sort_options[sort_choice]
+
+    # ---- Apply filters ----
+    filtered = df[
+        df["domain"].isin(selected_domains)
+        & df["llm_flag"].isin(selected_flags)
+        & (df["llm_final"] >= min_final)
+    ].copy()
+
+    if require_vehicle:
+        filtered = filtered[filtered["vehicles_list"].apply(lambda v: len(v) > 0)]
+
+    filtered = filtered.sort_values(by=sort_col, ascending=sort_asc, kind="stable")
+
+    # ---- Detail page ----
+    # If a paper title was clicked, show the detail view INSIDE the research tab.
+    # The detail page short-circuits the card list but stays within this tab so
+    # the user doesn't get yanked out of context.
+    if st.session_state.selected_id:
+        match = df[df["id"] == st.session_state.selected_id]
+        if not match.empty:
+            render_detail(match.iloc[0])
+            return
+        else:
+            st.session_state.selected_id = None
+
+    # ---- Counts header ----
+    flag_counts = filtered["llm_flag"].value_counts()
+    run_label = f" across {num_runs} runs" if multi_run and num_runs > 1 else ""
+    counts_text = (
+        f"**{len(filtered)}** papers{run_label} · "
+        f"thesis: {flag_counts.get('thesis', 0)} · "
+        f"watchlist: {flag_counts.get('watchlist', 0)} · "
+        f"longshot: {flag_counts.get('longshot', 0)} · "
+        f"skip: {flag_counts.get('skip', 0)}"
+    )
+    st.markdown(counts_text)
+
+    if len(filtered) == 0:
+        st.info("No papers match the current filters. Loosen the filters in the sidebar.")
+        return
+
+    for _, row in filtered.iterrows():
+        render_card(row)
+
+
+def render_news_tab() -> None:
+    """News tab — items from news_results_*.csv.
+    Smaller filter set than research; news items have fewer axes worth filtering on."""
+
+    st.sidebar.header("Source")
+
+    all_news_files = find_all_news_results()
+    if not all_news_files:
+        st.info(
+            "No news_results_*.csv found yet. Run the news pipeline:\n\n"
+            "```\npy -3.14 week7_news_fetcher.py\n"
+            "py -3.14 week7_news_fetcher_rss.py\n"
+            "py -3.14 week7_news_scoring.py --input <news_*.csv>\n```"
+        )
+        return
+
+    run_scope = st.sidebar.radio(
+        "Run scope",
+        options=["Single file", "Latest run only", "All runs merged"],
+        index=1,
+        help=(
+            "Single file: choose any one news CSV. "
+            "Latest run only: most recent news scoring run. "
+            "All runs merged: cross-run view, deduped by item ID."
+        ),
+        key="news_run_scope",
+    )
+
+    multi_run = run_scope == "All runs merged"
+    num_runs = 1
+    if multi_run:
+        df, num_runs = load_all_news_results(tuple(all_news_files))
+        if df.empty:
+            st.error("Could not load any news_results files.")
+            return
+        st.sidebar.caption(f"Merged **{num_runs}** run(s) · **{len(df)}** unique items")
+    elif run_scope == "Latest run only":
+        latest_path = all_news_files[-1]
+        df = load_news_results(latest_path)
+        st.sidebar.caption(f"Loaded **{len(df)}** items from `{Path(latest_path).name}`")
+    else:
+        default_path = all_news_files[-1]
+        csv_path = st.sidebar.text_input("News CSV", value=default_path,
+                                         help="Path to a news_results_*.csv file.",
+                                         key="news_csv_path")
+        if not Path(csv_path).exists():
+            st.error(f"File not found: {csv_path}")
+            return
+        df = load_news_results(csv_path)
+        st.sidebar.caption(f"Loaded **{len(df)}** items from `{Path(csv_path).name}`")
+
+    st.sidebar.markdown("---")
+    st.sidebar.header("Filters")
+
+    all_sources = sorted(df["source"].dropna().unique().tolist())
+    selected_sources = st.sidebar.multiselect(
+        "Sources", all_sources, default=all_sources,
+        format_func=lambda s: NEWS_SOURCE_LABELS.get(s, s),
+        key="news_sources",
+    )
+
+    all_news_tags = sorted(df["llm_tag"].dropna().unique().tolist())
+    selected_tags = st.sidebar.multiselect(
+        "Tags", all_news_tags, default=all_news_tags, key="news_tags",
+    )
+
+    all_news_flags = ["read", "skim", "skip"]
+    selected_news_flags = st.sidebar.multiselect(
+        "Flags", all_news_flags, default=["read", "skim"],
+        help="read = open the link · skim = quick glance · skip = noise",
+        key="news_flag_filter",
+    )
+
+    min_market = st.sidebar.slider(
+        "Min market_impact", min_value=0, max_value=10, value=0, step=1,
+        help="Filter out items with low broad-market consequence. "
+             "Useful for surfacing the macro/political stories the new axis was added to catch.",
+        key="news_min_market",
+    )
+
+    news_sort_options = {
+        "Market impact (high → low)":     ("llm_market_impact", False),
+        "Investment relevance (high → low)": ("llm_investment_relevance", False),
+        "Signal strength (high → low)":   ("llm_signal_strength", False),
+        "Posted (newest → oldest)":       ("posted_dt", False),
+    }
+    news_sort_choice = st.sidebar.selectbox(
+        "Sort by", list(news_sort_options.keys()), index=0, key="news_sort",
+    )
+    n_sort_col, n_sort_asc = news_sort_options[news_sort_choice]
+
+    # ---- Apply filters ----
+    filtered = df[
+        df["source"].isin(selected_sources)
+        & df["llm_tag"].isin(selected_tags)
+        & df["llm_flag"].isin(selected_news_flags)
+        & (df["llm_market_impact"].fillna(0) >= min_market)
+    ].copy()
+
+    filtered = filtered.sort_values(by=n_sort_col, ascending=n_sort_asc, kind="stable")
+
+    # ---- Counts header ----
+    flag_counts = filtered["llm_flag"].value_counts()
+    run_label = f" across {num_runs} runs" if multi_run and num_runs > 1 else ""
+    st.markdown(
+        f"**{len(filtered)}** news items{run_label} · "
+        f"read: {flag_counts.get('read', 0)} · "
+        f"skim: {flag_counts.get('skim', 0)} · "
+        f"skip: {flag_counts.get('skip', 0)}"
+    )
+
+    if len(filtered) == 0:
+        st.info("No news items match the current filters. Loosen the filters in the sidebar.")
+        return
+
+    for _, row in filtered.iterrows():
+        render_news_card(row)
+
 
 def main():
     st.set_page_config(
@@ -475,7 +955,7 @@ def main():
         '<h1 style="margin-bottom: 0;">Trend Engine</h1>'
         '<div style="color: #64748b; font-size: 13px; margin-bottom: 32px; '
         'font-family: monospace; letter-spacing: 0.05em;">'
-        'arXiv research digest · scored for 2-year retail investing horizon'
+        'arXiv research + macro news · scored for 2-year retail investing horizon'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -484,126 +964,15 @@ def main():
     if "selected_id" not in st.session_state:
         st.session_state.selected_id = None
 
-    # ---- Sidebar: file picker + filters ----
-    st.sidebar.header("Source")
-
-    all_result_files = find_all_results()
-    if not all_result_files:
-        st.error("No results_*.csv found in the current directory. "
-                 "Run week2_run_scoring.py first.")
-        st.stop()
-
-    # Multi-run toggle — merges all CSVs when enabled
-    multi_run = st.sidebar.toggle(
-        "Merge all runs",
-        value=False,
-        help="Combines every results_*.csv, keeping the latest score per paper. "
-             "Good for a cross-run best-of view once several runs have accumulated.",
-    )
-
-    num_runs = 1
-    if multi_run:
-        df, num_runs = load_all_results(tuple(all_result_files))
-        if df.empty:
-            st.error("Could not load any results files.")
-            st.stop()
-        st.sidebar.caption(f"Merged **{num_runs}** run(s) · **{len(df)}** unique papers")
-    else:
-        # Single-file mode: default to latest, allow override
-        default_path = all_result_files[-1]
-        csv_path = st.sidebar.text_input("Results CSV", value=default_path,
-                                         help="Path to a results_*.csv file.")
-        if not Path(csv_path).exists():
-            st.error(f"File not found: {csv_path}")
-            st.stop()
-        df = load_results(csv_path)
-        st.sidebar.caption(f"Loaded **{len(df)}** papers from `{Path(csv_path).name}`")
-        if "run_timestamp" in df.columns and len(df) > 0:
-            st.sidebar.caption(f"Scored: {df['run_timestamp'].iloc[0]}")
-
-    # ---- Filters ----
-    st.sidebar.markdown("---")
-    st.sidebar.header("Filters")
-
-    # Domain multiselect — default all selected
-    all_domains = sorted(df["domain"].unique().tolist())
-    selected_domains = st.sidebar.multiselect(
-        "Domains", all_domains, default=all_domains,
-    )
-
-    # Flag multiselect — default to thesis + watchlist + longshot (skip is the noise tier)
-    all_flags = ["thesis", "watchlist", "longshot", "skip"]
-    selected_flags = st.sidebar.multiselect(
-        "Flags", all_flags, default=["thesis", "watchlist", "longshot"],
-        help="thesis = act today · watchlist = revisit in 3-6 months · longshot = high horizon, 5-20yr hold · skip = noise",
-    )
-
-    # Min final score
-    min_final = st.sidebar.slider(
-        "Min final score", min_value=0.0, max_value=10.0,
-        value=DEFAULT_MIN_FINAL, step=0.5,
-    )
-
-    # "Has public vehicle" toggle — useful for "show me actionable picks only"
-    require_vehicle = st.sidebar.checkbox(
-        "Only papers with named public vehicle(s)", value=False,
-        help="Hides papers where the LLM couldn't name a public-equity exposure.",
-    )
-
-    # Sort
-    sort_options = {
-        "Final score (high → low)": ("llm_final", False),
-        "Final score (low → high)": ("llm_final", True),
-        "Date (newest → oldest)":   ("published_dt", False),
-        "Date (oldest → newest)":   ("published_dt", True),
-        "Domain (A → Z)":           ("domain", True),
-    }
-    sort_choice = st.sidebar.selectbox("Sort by", list(sort_options.keys()),
-                                       index=0)
-    sort_col, sort_asc = sort_options[sort_choice]
-
-    # ---- Apply filters ----
-    filtered = df[
-        df["domain"].isin(selected_domains)
-        & df["llm_flag"].isin(selected_flags)
-        & (df["llm_final"] >= min_final)
-    ].copy()
-
-    if require_vehicle:
-        filtered = filtered[filtered["vehicles_list"].apply(lambda v: len(v) > 0)]
-
-    filtered = filtered.sort_values(by=sort_col, ascending=sort_asc, kind="stable")
-
-    # ---- Detail page ----
-    # If a paper title was clicked, show the detail view instead of the card list.
-    if st.session_state.selected_id:
-        match = df[df["id"] == st.session_state.selected_id]
-        if not match.empty:
-            render_detail(match.iloc[0])
-            return
-        else:
-            # ID not found (e.g. switched CSV) — fall back to list
-            st.session_state.selected_id = None
-
-    # ---- Counts header ----
-    flag_counts = filtered["llm_flag"].value_counts()
-    run_label = f" across {num_runs} runs" if multi_run and num_runs > 1 else ""
-    counts_text = (
-        f"**{len(filtered)}** papers{run_label} · "
-        f"thesis: {flag_counts.get('thesis', 0)} · "
-        f"watchlist: {flag_counts.get('watchlist', 0)} · "
-        f"longshot: {flag_counts.get('longshot', 0)} · "
-        f"skip: {flag_counts.get('skip', 0)}"
-    )
-    st.markdown(counts_text)
-
-    if len(filtered) == 0:
-        st.info("No papers match the current filters. Loosen the filters in the sidebar.")
-        return
-
-    # ---- Render cards ----
-    for _, row in filtered.iterrows():
-        render_card(row)
+    # ---- Tabs ----
+    # Research first since it's the established surface; News is the new addition.
+    # Sidebar widgets render per-tab — Streamlit re-renders the sidebar on tab
+    # switch, so each tab's filters appear only when its tab is active.
+    research_tab, news_tab = st.tabs(["Research", "News"])
+    with research_tab:
+        render_research_tab()
+    with news_tab:
+        render_news_tab()
 
 
 if __name__ == "__main__":
