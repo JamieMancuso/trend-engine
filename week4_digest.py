@@ -68,15 +68,27 @@ FLAG_COLORS = {
 
 # ---- DATA LOADING ----------------------------------------------------------
 
+def _sort_by_mtime(paths: list[str]) -> list[str]:
+    """Sort paths oldest → newest by file modification time.
+
+    Why mtime, not filename: ad-hoc result files don't always follow the
+    `results_YYYY-MM-DD_HHMMSS.csv` pattern (e.g. `results_top11_rescore.csv`),
+    and alphabetical sort puts those AFTER date-named files because the prefix
+    after `results_` is `t` (which sorts after digits). mtime is robust to any
+    naming convention.
+    """
+    return sorted(paths, key=lambda p: os.path.getmtime(p))
+
+
 def find_latest_results() -> str | None:
-    """Find the most recent results_*.csv in the current directory."""
-    matches = sorted(glob.glob(RESULTS_GLOB))
+    """Find the most recent results_*.csv in the current directory (by mtime)."""
+    matches = _sort_by_mtime(glob.glob(RESULTS_GLOB))
     return matches[-1] if matches else None
 
 
 def find_all_results() -> list[str]:
-    """Return all results_*.csv files sorted oldest → newest."""
-    return sorted(glob.glob(RESULTS_GLOB))
+    """Return all results_*.csv files sorted oldest → newest by mtime."""
+    return _sort_by_mtime(glob.glob(RESULTS_GLOB))
 
 
 # News pipeline produces news_results_*.csv. Schema is documented in
@@ -86,8 +98,8 @@ NEWS_RESULTS_GLOB = "news_results_*.csv"
 
 
 def find_all_news_results() -> list[str]:
-    """Return all news_results_*.csv files sorted oldest → newest."""
-    return sorted(glob.glob(NEWS_RESULTS_GLOB))
+    """Return all news_results_*.csv files sorted oldest → newest by mtime."""
+    return _sort_by_mtime(glob.glob(NEWS_RESULTS_GLOB))
 
 
 @st.cache_data(show_spinner=False)
@@ -976,4 +988,52 @@ def main():
 
 
 if __name__ == "__main__":
+    main()8b; font-size: 13px; margin-bottom: 32px; '
+        'font-family: monospace; letter-spacing: 0.05em;">'
+        'arXiv research + macro news · scored for 2-year retail investing horizon'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ---- Session state init ----
+    if "selected_id" not in st.session_state:
+        st.session_state.selected_id = None
+
+    # ---- Tabs ----
+    # Research first since it's the established surface; News is the new addition.
+    # Sidebar widgets render per-tab — Streamlit re-renders the sidebar on tab
+    # switch, so each tab's filters appear only when its tab is active.
+    research_tab, news_tab = st.tabs(["Research", "News"])
+    with research_tab:
+        render_research_tab()
+    with news_tab:
+        render_news_tab()
+
+
+if __name__ == "__main__":
+    main()8b; font-size: 13px; margin-bottom: 32px; '
+        'font-family: monospace; letter-spacing: 0.05em;">'
+        'arXiv research + macro news · scored for 2-year retail investing horizon'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ---- Session state init ----
+    if "selected_id" not in st.session_state:
+        st.session_state.selected_id = None
+
+    # ---- Tabs ----
+    # Research first since it's the established surface; News is the new addition.
+    # Sidebar widgets render per-tab — Streamlit re-renders the sidebar on tab
+    # switch, so each tab's filters appear only when its tab is active.
+    research_tab, news_tab = st.tabs(["Research", "News"])
+    with research_tab:
+        render_research_tab()
+    with news_tab:
+        render_news_tab()
+
+
+if __name__ == "__main__":
+    main()
+__main__":
     main()
