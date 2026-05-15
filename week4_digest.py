@@ -195,8 +195,19 @@ def load_results(path: str) -> pd.DataFrame:
     """
     Load and normalize a single results CSV. Cached so filter changes
     don't re-read the file. The cache invalidates if `path` changes.
+
+    Dedups on paper ID — the scorer occasionally writes a paper twice in
+    one run (observed on multiple May 2026 production CSVs). Without this
+    dedup, the digest renders two cards with the same st.button key and
+    crashes with StreamlitDuplicateElementKey.
     """
-    return _normalize(pd.read_csv(path))
+    df = pd.read_csv(path)
+    if "id" in df.columns:
+        # Prefer most-recent score within the file if a run_timestamp exists.
+        if "run_timestamp" in df.columns:
+            df = df.sort_values("run_timestamp", ascending=True)
+        df = df.drop_duplicates(subset=["id"], keep="last").reset_index(drop=True)
+    return _normalize(df)
 
 
 # ---- UI HELPERS ------------------------------------------------------------
@@ -467,8 +478,11 @@ def render_card(row) -> None:
                 unsafe_allow_html=True,
             )
 
-            # Title as a clickable button — opens detail page
-            if st.button(row["title"], key=f"title_{row['id']}",
+            # Title as a clickable button — opens detail page.
+            # Key uses dataframe index, not paper id, since duplicate ids
+            # within a single CSV have been observed and would crash here.
+            _btn_key = f"title_{row.name}_{row['id']}"
+            if st.button(row["title"], key=_btn_key,
                          help="Click to see full score breakdown"):
                 st.session_state.selected_id = row["id"]
                 st.rerun()

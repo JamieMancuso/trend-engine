@@ -151,6 +151,31 @@ this file, prefer programmatic patches over Edit tool for inserts >100 lines.
 - **Portfolio tab:** 30 days from build (2026-06-14). Operator should be
   opening the tab ≥3x/week. If not, deprecate or simplify.
 
+### Mid-deploy crash on Research tab (discovered + fixed during push)
+
+After the rollup-toggle push, Streamlit Cloud crashed on Research tab
+load with `StreamlitDuplicateElementKey`. Root cause: 5 of the 11
+production `results_*.csv` files contain duplicate paper IDs within a
+single file (`results_2026-05-04`: 211 rows / 207 unique; `2026-05-13`:
+214 rows / 208 unique; etc.). The scorer occasionally writes a paper
+twice in one run.
+
+`load_all_results` already deduped, but `load_results` (single-file +
+latest-run modes) didn't — two cards rendered with the same
+`key=f"title_{id}"` and crashed.
+
+Fix applied in `week4_digest.py`:
+1. `load_results` now dedups on `id`, keeping the most recent score.
+2. Button keys now combine row index + paper id
+   (`f"title_{row.name}_{row['id']}"`) — collision-proof even if dedup
+   misses something later.
+
+**Upstream bug left untouched:** the actual root cause is in
+`week2_run_scoring.py` writing duplicates. Charter instructions say
+never modify .py files unless explicitly asked, and the scorer hasn't
+been asked. Logging here so next session can investigate why some
+production runs emit duplicate rows for the same arXiv ID.
+
 ## Deferred / not in this build
 
 - **Chaining `shadow_portfolio.py` into `scheduled_run.py`** — should land
