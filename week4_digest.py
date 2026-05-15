@@ -966,6 +966,279 @@ def render_news_tab() -> None:
         render_news_card(row)
 
 
+# ---- PORTFOLIO TAB (Week 8) ------------------------------------------------
+
+# yfinance wrapper guarded the same way the analytics page guards shadow_portfolio —
+# Portfolio tab renders an install hint instead of crashing if yfinance is missing.
+try:
+    from yfinance_wrapper import (
+        get_current_price as _yf_current,
+        get_history as _yf_history,
+        yfinance_available as _yf_available,
+    )
+    _PORTFOLIO_AVAILABLE = True
+except Exception as _pf_exc:
+    _PORTFOLIO_AVAILABLE = False
+    _PORTFOLIO_IMPORT_ERR = str(_pf_exc)
+
+HOLDINGS_PATH = "holdings.csv"
+HOLDINGS_COLUMNS = [
+    "ticker", "broker", "shares", "cost_basis_per_share", "purchase_date", "notes",
+]
+
+
+def _load_holdings() -> pd.DataFrame:
+    """Read holdings.csv; return empty-with-schema if missing."""
+    p = Path(HOLDINGS_PATH)
+    if not p.exists():
+        return pd.DataFrame(columns=HOLDINGS_COLUMNS)
+    try:
+        df = pd.read_csv(p)
+    except Exception:
+        return pd.DataFrame(columns=HOLDINGS_COLUMNS)
+    for col in HOLDINGS_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    df["shares"] = pd.to_numeric(df["shares"], errors="coerce").fillna(0.0)
+    df["cost_basis_per_share"] = pd.to_numeric(
+        df["cost_basis_per_share"], errors="coerce"
+    ).fillna(0.0)
+    df["ticker"] = df["ticker"].astype(str).str.upper().str.strip()
+    df["broker"] = df["broker"].astype(str).str.strip()
+    return df[df["ticker"].str.len() > 0].reset_index(drop=True)
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _portfolio_prices(tickers_tuple: tuple) -> dict:
+    """Cached batch lookup — keyed on the sorted ticker tuple."""
+    return {t: _yf_current(t) for t in tickers_tuple}
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _portfolio_history(ticker: str, period: str) -> pd.DataFrame:
+    """Cached per-ticker historical pull for the chart."""
+    return _yf_history(ticker, period=period)
+
+
+def render_portfolio_tab() -> None:
+    """
+    Manual-holdings view: Webull + ETrade positions driven by holdings.csv.
+    Top: table with computed market value + gain/loss. Bottom: per-ticker
+    historical chart with period toggle. Refresh button clears price cache.
+
+    Strict scope: no real-time tick, no options, no crypto, no dividends,
+    no tax lots, no broker auto-sync. See charter section 10 item 9 plus
+    2026-05-15 decision log entry.
+    """
+    st.markdown(
+        '<h2 style="margin-top: 0;">Portfolio</h2>'
+        '<div style="color:#64748b; font-size:13px; margin-bottom:16px;">'
+        'Manual holdings - yfinance prices (delayed, not real-time) - '
+        'edit <code>holdings.csv</code> to update positions.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    if not _PORTFOLIO_AVAILABLE:
+        st.info(
+            "yfinance wrapper not available. "
+            f"Import error: `{_PORTFOLIO_IMPORT_ERR}`. "
+            "Install yfinance: `py -3.14 -m pip install yfinance --user`"
+        )
+        return
+
+    holdings = _load_holdings()
+
+    if holdings.empty:
+        st.info(
+            "No holdings yet - add rows to **`holdings.csv`** with columns:  \n"
+            "`ticker, broker, shares, cost_basis_per_share, purchase_date, notes`.\n\n"
+            "Then click **Refresh prices** below."
+        )
+        if st.button("Refresh prices", key="portfolio_refresh_empty"):
+            _portfolio_prices.clear()
+            _portfolio_history.clear()
+            st.rerun()
+        return
+
+    st.sidebar.header("Portfolio filters")
+    brokers = sorted(holdings["broker"].dropna().unique().tolist())
+    broker_filter = st.sidebar.selectbox(
+        "Broker",
+        options=["All"] + brokers,
+        index=0,
+        key="portfolio_broker_filter",
+    )
+    if broker_filter != "All":
+        holdings = holdings[holdings["broker"] == broker_filter].reset_index(drop=True)
+        if holdings.empty:
+            st.info(f"No holdings under broker '{broker_filter}'.")
+            return
+
+    # Cross-broker rollup toggle. Default rolled up so a ticker held at
+    # both brokers appears as one position; "By broker" splits them out.
+    # Hidden / disabled when a specific broker is already selected.
+    rollup_mode = st.sidebar.radio(
+        "View",
+        options=["Rolled up", "By broker"],
+        index=0,
+        key="portfolio_rollup_mode",
+        help="Rolled up: one row per ticker, shares summed across brokers, "
+             "cost basis weighted-averaged. By broker: one row per (ticker, broker).",
+        disabled=(broker_filter != "All"),
+    )
+
+    col_btn, col_caption = st.columns([1, 4])
+    with col_btn:
+        if st.button("Refresh prices", key="portfolio_refresh"):
+            _portfolio_prices.clear()
+            _portfolio_history.clear()
+            st.rerun()
+    with col_caption:
+        st.caption(
+            f"{len(holdings)} position(s) - prices cached for 1h - "
+            f"yfinance available: {_yf_available()}"
+        )
+
+    # Apply rollup if requested. Rolled up = aggregate by ticker:
+    #   shares = sum
+    #   cost_basis_per_share = weighted average
+    #   broker = single broker if all-same else "BrokerA + BrokerB"
+    #   purchase_date = earliest non-blank
+    #   notes = pipe-joined distinct non-blank
+    if rollup_mode == "Rolled up" and broker_filter == "All":
+        def _rollup(g):
+            total_shares = g["shares"].sum()
+            total_cost = (g["shares"] * g["cost_basis_per_share"]).sum()
+            avg_cost = (total_cost / total_shares) if total_shares else 0.0
+            brokers_in_group = sorted(set(g["broker"].dropna().astype(str)) - {""})
+            broker_str = brokers_in_group[0] if len(brokers_in_group) == 1 else " + ".join(brokers_in_group)
+            dates = sorted(set(d for d in g["purchase_date"].astype(str) if d.strip()))
+            notes = " | ".join(sorted(set(n for n in g["notes"].astype(str) if n.strip())))
+            return pd.Series({
+                "broker": broker_str,
+                "shares": total_shares,
+                "cost_basis_per_share": avg_cost,
+                "purchase_date": dates[0] if dates else "",
+                "notes": notes,
+            })
+        # include_groups=False introduced in pandas 2.2; fall back if older.
+        try:
+            holdings = (
+                holdings.groupby("ticker", as_index=False)
+                .apply(_rollup, include_groups=False)
+                .reset_index(drop=True)
+            )
+        except TypeError:
+            holdings = (
+                holdings.groupby("ticker", as_index=False)
+                .apply(_rollup)
+                .reset_index(drop=True)
+            )
+        if "ticker" not in holdings.columns:
+            holdings = holdings.reset_index()
+
+    tickers = tuple(sorted(holdings["ticker"].unique().tolist()))
+    prices = _portfolio_prices(tickers)
+    holdings["current_price"] = holdings["ticker"].map(prices)
+    holdings["market_value"] = holdings["shares"] * holdings["current_price"]
+    holdings["cost_basis_total"] = holdings["shares"] * holdings["cost_basis_per_share"]
+    holdings["gain_loss_$"] = holdings["market_value"] - holdings["cost_basis_total"]
+
+    def _gl_pct(row):
+        cbt = row["cost_basis_total"]
+        if not isinstance(cbt, (int, float)) or cbt == 0 or pd.isna(cbt):
+            return None
+        gl = row["gain_loss_$"]
+        if not isinstance(gl, (int, float)) or pd.isna(gl):
+            return None
+        return (gl / cbt) * 100.0
+
+    holdings["gain_loss_pct"] = holdings.apply(_gl_pct, axis=1)
+
+    total_mv = holdings["market_value"].sum(skipna=True)
+    if total_mv and not pd.isna(total_mv) and total_mv > 0:
+        holdings["pct_of_total"] = holdings["market_value"] / total_mv * 100.0
+    else:
+        holdings["pct_of_total"] = 0.0
+
+    total_cost = holdings["cost_basis_total"].sum(skipna=True)
+    total_gl = total_mv - total_cost if pd.notna(total_mv) and pd.notna(total_cost) else 0.0
+    total_gl_pct = (total_gl / total_cost * 100.0) if total_cost else 0.0
+
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Market value", f"${total_mv:,.0f}" if pd.notna(total_mv) else "-")
+    m2.metric("Cost basis", f"${total_cost:,.0f}" if pd.notna(total_cost) else "-")
+    m3.metric("Gain/Loss $", f"${total_gl:,.0f}", f"{total_gl_pct:+.1f}%")
+    m4.metric("Positions", f"{len(holdings)}")
+
+    show = holdings[[
+        "ticker", "broker", "shares", "cost_basis_per_share", "current_price",
+        "market_value", "gain_loss_$", "gain_loss_pct", "pct_of_total", "purchase_date", "notes",
+    ]].rename(columns={
+        "cost_basis_per_share": "avg cost",
+        "current_price":        "current $",
+        "market_value":         "value",
+        "gain_loss_$":          "GL $",
+        "gain_loss_pct":        "GL %",
+        "pct_of_total":         "% portfolio",
+        "purchase_date":        "purchased",
+    }).sort_values("value", ascending=False, na_position="last")
+
+    st.dataframe(
+        show,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "ticker":      st.column_config.TextColumn("ticker"),
+            "broker":      st.column_config.TextColumn("broker"),
+            "shares":      st.column_config.NumberColumn("shares", format="%.4g"),
+            "avg cost":    st.column_config.NumberColumn("avg cost", format="$%.2f"),
+            "current $":   st.column_config.NumberColumn("current $", format="$%.2f"),
+            "value":       st.column_config.NumberColumn("value", format="$%,.0f"),
+            "GL $":        st.column_config.NumberColumn("GL $", format="$%,.0f"),
+            "GL %":        st.column_config.NumberColumn("GL %", format="%+.1f%%"),
+            "% portfolio": st.column_config.ProgressColumn(
+                "% portfolio", min_value=0, max_value=100, format="%.1f%%"),
+            "purchased":   st.column_config.TextColumn("purchased"),
+            "notes":       st.column_config.TextColumn("notes", width="medium"),
+        },
+        height=min(540, 60 + 35 * len(show)),
+        key="portfolio_holdings_table",
+    )
+
+    st.markdown(
+        '<h3 style="margin-top:32px;">Price history</h3>',
+        unsafe_allow_html=True,
+    )
+
+    chart_col1, chart_col2 = st.columns([2, 3])
+    with chart_col1:
+        selected_ticker = st.selectbox(
+            "Ticker",
+            options=list(tickers),
+            index=0,
+            key="portfolio_chart_ticker",
+        )
+    with chart_col2:
+        period_map = {"1M": "1mo", "6M": "6mo", "1Y": "1y", "5Y": "5y"}
+        period_label = st.radio(
+            "Period",
+            options=list(period_map.keys()),
+            index=2,
+            horizontal=True,
+            key="portfolio_chart_period",
+        )
+        period = period_map[period_label]
+
+    hist = _portfolio_history(selected_ticker, period)
+    if hist is None or hist.empty:
+        st.info(f"No history available for {selected_ticker} over {period_label}.")
+    else:
+        chart_df = hist[["Close"]].rename(columns={"Close": selected_ticker})
+        st.line_chart(chart_df, height=320, use_container_width=True)
+
+
 def main():
     st.set_page_config(
         page_title="Trend Engine — Daily Digest",
@@ -1001,14 +1274,18 @@ def main():
         st.session_state.selected_id = None
 
     # ---- Tabs ----
-    # Research first since it's the established surface; News is the new addition.
-    # Sidebar widgets render per-tab — Streamlit re-renders the sidebar on tab
-    # switch, so each tab's filters appear only when its tab is active.
-    research_tab, news_tab = st.tabs(["Research", "News"])
+    # Research first since it's the established surface; News and Portfolio
+    # are the newer additions. Sidebar widgets render per-tab — Streamlit
+    # re-renders the sidebar on tab switch, so each tab's filters appear
+    # only when its tab is active. Widget keys are tab-prefixed
+    # (research_ / news_ / portfolio_) to dodge Streamlit's DuplicateWidgetID.
+    research_tab, news_tab, portfolio_tab = st.tabs(["Research", "News", "Portfolio"])
     with research_tab:
         render_research_tab()
     with news_tab:
         render_news_tab()
+    with portfolio_tab:
+        render_portfolio_tab()
 
 
 if __name__ == "__main__":

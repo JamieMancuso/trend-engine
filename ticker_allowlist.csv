@@ -1,0 +1,204 @@
+ticker,company,sector
+NVDA,NVIDIA,AI/Semis
+AMD,Advanced Micro Devices,AI/Semis
+INTC,Intel,Semis
+TSM,Taiwan Semiconductor,Semis
+AVGO,Broadcom,Semis
+QCOM,Qualcomm,Semis
+MU,Micron,Memory
+ARM,Arm Holdings,Semis
+ASML,ASML,Semi Equip
+LRCX,Lam Research,Semi Equip
+AMAT,Applied Materials,Semi Equip
+KLAC,KLA,Semi Equip
+MRVL,Marvell,Semis
+NXPI,NXP,Semis
+SMCI,Super Micro,AI Hardware
+DELL,Dell,AI Hardware
+ANET,Arista Networks,Networking
+HPE,Hewlett Packard Enterprise,Servers
+CRDO,Credo Tech,Networking
+ALAB,Astera Labs,Networking
+VRT,Vertiv,Data Center
+ETN,Eaton,Data Center
+PWR,Quanta Services,Data Center
+GEV,GE Vernova,Power/Grid
+NVT,nVent Electric,Data Center
+MSFT,Microsoft,Cloud/AI
+GOOGL,Alphabet,Cloud/AI
+GOOG,Alphabet Class C,Cloud/AI
+AMZN,Amazon,Cloud/AI
+META,Meta,AI/Social
+AAPL,Apple,Consumer Tech
+TSLA,Tesla,EV/Autonomy
+ORCL,Oracle,Cloud
+IBM,IBM,Enterprise
+CRM,Salesforce,SaaS
+NOW,ServiceNow,SaaS
+SNOW,Snowflake,Data
+PLTR,Palantir,AI Analytics
+DDOG,Datadog,Observability
+NET,Cloudflare,Edge/Security
+MDB,MongoDB,Data
+PATH,UiPath,RPA
+BBAI,BigBear.ai,AI Analytics
+SOUN,SoundHound,Voice AI
+NTNX,Nutanix,Hybrid Cloud
+PSTG,Pure Storage,Storage
+NTAP,NetApp,Storage
+CSCO,Cisco,Networking
+JNPR,Juniper Networks,Networking
+LITE,Lumentum,Optical
+COHR,Coherent,Optical
+IBKR,Interactive Brokers,Finance
+WOLF,Wolfspeed,Power Semis
+NVTS,Navitas Semiconductor,GaN Power
+POWI,Power Integrations,Power Semis
+MPWR,Monolithic Power,Power Semis
+TER,Teradyne,Robotics/Test
+SYM,Symbotic,Warehouse Robotics
+ZBRA,Zebra Technologies,Logistics Tech
+ROK,Rockwell Automation,Industrial Automation
+EMR,Emerson Electric,Industrial Automation
+ABB,ABB,Industrial Automation
+ISRG,Intuitive Surgical,Surgical Robotics
+IRBT,iRobot,Consumer Robotics
+ARBE,Arbe Robotics,Auto LiDAR
+LIDR,AEye,LiDAR
+INVZ,Innoviz,LiDAR
+OUST,Ouster,LiDAR
+LAZR,Luminar,LiDAR
+MBLY,Mobileye,Autonomy
+APTV,Aptiv,Auto Electronics
+NIO,NIO,EV
+RIVN,Rivian,EV
+LCID,Lucid,EV
+F,Ford,Auto
+GM,General Motors,Auto
+XPO,XPO Logistics,Trucking
+ODFL,Old Dominion,Trucking
+UPS,United Parcel Service,Logistics
+FDX,FedEx,Logistics
+JBHT,J.B. Hunt,Trucking
+KNX,Knight-Swift,Trucking
+LAC,Lithium Americas,Lithium
+ALB,Albemarle,Lithium
+SQM,SQM,Lithium
+LTHM,Livent (merged),Lithium
+PLL,Piedmont Lithium,Lithium
+SGML,Sigma Lithium,Lithium
+MP,MP Materials,Rare Earth
+ENPH,Enphase,Solar Inverters
+SEDG,SolarEdge,Solar Inverters
+FSLR,First Solar,Solar Panels
+NXT,Nextracker,Solar Trackers
+ARRY,Array Technologies,Solar Trackers
+RUN,Sunrun,Residential Solar
+TAN,Solar ETF,Solar
+ICLN,Clean Energy ETF,Clean Energy
+LIT,Lithium ETF,Lithium
+URA,Uranium ETF,Uranium
+CCJ,Cameco,Uranium
+URNM,Uranium Miners ETF,Uranium
+LEU,Centrus Energy,Uranium Enrichment
+OKLO,Oklo,Nuclear SMR
+NNE,Nano Nuclear,Nuclear SMR
+SMR,NuScale Power,Nuclear SMR
+BWXT,BWX Technologies,Nuclear
+CEG,Constellation Energy,Nuclear Power
+VST,Vistra,Power
+TLN,Talen Energy,Power
+ETR,Entergy,Utility
+SO,Southern Company,Utility
+NEE,NextEra,Utility
+DUK,Duke Energy,Utility
+AEP,American Electric Power,Utility
+EIX,Edison International,Utility
+PPL,PPL Corp,Utility
+PCG,PG&E,Utility
+PLUG,Plug Power,Hydrogen
+BE,Bloom Energy,Fuel Cells
+BLDP,Ballard Power,Fuel Cells
+QS,QuantumScape,Solid State Batteries
+SLDP,Solid Power,Solid State Batteries
+FREY,FREYR Battery,Batteries
+ABCL,AbCellera,Biotech AI
+RXRX,Recursion,AI Drug Discovery
+SDGR,Schrodinger,Computational Chem
+EXAI,Exscientia (deal),AI Drug Discovery
+TEM,Tempus AI,Healthtech AI
+VEEV,Veeva Systems,Life Sci SaaS
+ILMN,Illumina,Genomics
+PACB,Pacific Biosciences,Sequencing
+TWST,Twist Bioscience,Synth Bio
+CDNA,CareDx,Diagnostics
+NTRA,Natera,Diagnostics
+EXAS,Exact Sciences,Diagnostics
+GH,Guardant Health,Diagnostics
+CRSP,CRISPR Therapeutics,Gene Editing
+EDIT,Editas Medicine,Gene Editing
+NTLA,Intellia,Gene Editing
+BEAM,Beam Therapeutics,Gene Editing
+VRTX,Vertex Pharma,Pharma
+MRNA,Moderna,Vaccines
+BNTX,BioNTech,Vaccines
+NVAX,Novavax,Vaccines
+LLY,Eli Lilly,Pharma/GLP-1
+NVO,Novo Nordisk,Pharma/GLP-1
+PFE,Pfizer,Pharma
+MRK,Merck,Pharma
+JNJ,Johnson & Johnson,Pharma
+BMY,Bristol Myers,Pharma
+AMGN,Amgen,Biotech
+GILD,Gilead,Pharma
+REGN,Regeneron,Biotech
+IONS,Ionis,Biotech
+SRPT,Sarepta,Biotech
+MDT,Medtronic,Med Devices
+SYK,Stryker,Med Devices
+BSX,Boston Scientific,Med Devices
+EW,Edwards Lifesciences,Med Devices
+DXCM,Dexcom,Med Devices
+INSP,Inspire Medical,Med Devices
+IONQ,IonQ,Quantum
+RGTI,Rigetti,Quantum
+QBTS,D-Wave,Quantum
+QUBT,Quantum Computing Inc,Quantum
+HON,Honeywell,Conglomerate/Quantum
+LMT,Lockheed Martin,Defense/Space
+RTX,RTX (Raytheon),Defense
+NOC,Northrop Grumman,Defense
+GD,General Dynamics,Defense
+LHX,L3Harris,Defense
+BA,Boeing,Aerospace
+ASTS,AST SpaceMobile,Satellite
+IRDM,Iridium,Satellite
+GSAT,Globalstar,Satellite
+RKLB,Rocket Lab,Space
+PL,Planet Labs,Earth Imaging
+MNTS,Momentus,Space
+LUNR,Intuitive Machines,Space
+RDW,Redwire,Space
+SPCE,Virgin Galactic,Space
+JOBY,Joby Aviation,eVTOL
+ACHR,Archer Aviation,eVTOL
+EH,EHang,eVTOL
+ARCB,ArcBest,Logistics
+GOLD,Barrick Gold,Mining
+NEM,Newmont,Mining
+FCX,Freeport-McMoRan,Copper
+TECK,Teck Resources,Mining
+SCCO,Southern Copper,Copper
+RIO,Rio Tinto,Mining
+BHP,BHP,Mining
+VALE,Vale,Mining
+VTI,Vanguard Total US,ETF
+SPY,S&P 500 ETF,ETF
+QQQ,Nasdaq ETF,ETF
+IWM,Russell 2000 ETF,ETF
+SOXX,Semiconductor ETF,ETF
+SMH,Semiconductor ETF,ETF
+ARKK,ARK Innovation,ETF
+ROBO,Robotics ETF,ETF
+BOTZ,Robotics ETF,ETF
+KWEB,China Internet ETF,ETF

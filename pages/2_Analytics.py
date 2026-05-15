@@ -35,6 +35,17 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+# Shadow portfolio module (Week 8 addition). Wrapped in try/except so the
+# Analytics page renders even if yfinance isn't installed locally — the
+# section will degrade to an "install yfinance" hint.
+try:
+    import shadow_portfolio as sp
+    _SHADOW_AVAILABLE = True
+except Exception as _sp_exc:
+    sp = None
+    _SHADOW_AVAILABLE = False
+    _SHADOW_IMPORT_ERR = str(_sp_exc)
+
 
 # ---- CONFIG ----------------------------------------------------------------
 
@@ -393,6 +404,115 @@ def render_watchlist_aging(latest: pd.DataFrame, all_runs: pd.DataFrame) -> None
     )
 
 
+# ---- CHART 5: SHADOW PORTFOLIO --------------------------------------------
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _load_shadow_with_prices() -> pd.DataFrame:
+    """
+    Pull the on-disk shadow portfolio, then enrich with current prices via
+    yfinance. Cached for 1 hour to keep network calls cheap. The Refresh
+    button below clears this cache.
+    """
+    if not _SHADOW_AVAILABLE:
+        return pd.DataFrame()
+    df = sp.load_existing_shadow()
+    if df.empty:
+        return df
+    return sp.refresh_current_prices(df)
+
+
+def render_shadow_portfolio() -> None:
+    """
+    Shadow portfolio = tickers the system surfaced 3+ times in 7 days,
+    snapshotted at threshold-crossing. Feedback loop: did we have signal
+    BEFORE the run-up, and did we act on it?
+
+    Charter 2026-05-12 + Week 8 build. Refresh button is on-demand only —
+    no scheduled yfinance calls.
+    """
+    st.markdown(
+        '<h2 style="margin-top:48px;">Shadow portfolio</h2>'
+        '<div style="color:#64748b; font-size:13px; margin-bottom:16px;">'
+        'Tickers the system flagged 3+ times in a 7-day window. Price snapshotted '
+        'at threshold-crossing; current price refreshed via yfinance. '
+        'Did we have the signal before the move?'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    if not _SHADOW_AVAILABLE:
+        st.info(
+            "Shadow portfolio module not available. "
+            f"Import error: `{_SHADOW_IMPORT_ERR}`. "
+            "Install yfinance: `py -3.14 -m pip install yfinance --user`"
+        )
+        return
+
+    col_refresh, col_scan = st.columns([1, 1])
+    with col_refresh:
+        if st.button("↻ Refresh prices", key="shadow_refresh",
+                     help="Re-pull current prices via yfinance. Cleared cache, no scheduled calls."):
+            _load_shadow_with_prices.clear()
+    with col_scan:
+        if st.button("⊕ Scan for new triggers", key="shadow_scan",
+                     help="Re-scan all results / news CSVs for new 3-mention triggers. "
+                          "Writes any new rows to shadow_portfolio.csv."):
+            with st.spinner("Scanning…"):
+                full = sp.scan_for_triggers(fetch_prices=True, verbose=False)
+                sp.write_shadow_portfolio(full)
+            _load_shadow_with_prices.clear()
+            st.success(f"Scan complete — shadow portfolio now has {len(full)} ticker(s).")
+
+    df = _load_shadow_with_prices()
+    if df.empty:
+        st.info(
+            "Shadow portfolio is empty. Click **Scan for new triggers** above to "
+            "build the initial set from existing results / news CSVs."
+        )
+        return
+
+    # Sort by absolute % move desc — biggest movers (up or down) come first.
+    # Triggers without price data sort last.
+    sortable = df.copy()
+    sortable["__abs_move"] = sortable["pct_change_since_trigger"].abs().fillna(-1)
+    sortable = sortable.sort_values("__abs_move", ascending=False).drop(columns="__abs_move")
+
+    show = sortable[[
+        "ticker",
+        "first_trigger_date",
+        "trigger_price",
+        "current_price",
+        "pct_change_since_trigger",
+        "mention_count_at_trigger",
+        "source_breakdown",
+        "notes",
+    ]].rename(columns={
+        "first_trigger_date":       "trigger date",
+        "trigger_price":            "trigger $",
+        "current_price":            "current $",
+        "pct_change_since_trigger": "Δ %",
+        "mention_count_at_trigger": "mentions",
+        "source_breakdown":         "sources",
+    })
+
+    st.dataframe(
+        show,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "ticker":       st.column_config.TextColumn("ticker"),
+            "trigger date": st.column_config.TextColumn("trigger date"),
+            "trigger $":    st.column_config.NumberColumn("trigger $", format="$%.2f"),
+            "current $":    st.column_config.NumberColumn("current $", format="$%.2f"),
+            "Δ %":          st.column_config.NumberColumn("Δ %", format="%+.1f%%"),
+            "mentions":     st.column_config.NumberColumn("mentions", format="%d"),
+            "sources":      st.column_config.TextColumn("sources", width="medium"),
+            "notes":        st.column_config.TextColumn("notes", width="medium"),
+        },
+        height=min(600, 60 + 35 * len(show)),
+    )
+
+
 # ---- MAIN ------------------------------------------------------------------
 
 def main():
@@ -450,6 +570,7 @@ def main():
     render_flag_over_time(all_runs)
     render_top_horizon(latest)
     render_watchlist_aging(latest, all_runs)
+    render_shadow_portfolio()
 
 
 if __name__ == "__main__":
