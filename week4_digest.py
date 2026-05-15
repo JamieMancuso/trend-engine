@@ -321,26 +321,18 @@ def render_footer(row) -> str:
     date_str = row["published_date"]
     url = row["url"]
 
-    return f"""
-    <div style="
-        margin-top: 12px;
-        padding-top: 10px;
-        border-top: 1px solid rgba(120,120,140,0.18);
-        font-size: 12px;
-        color: #94a3b8;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px 0;
-        align-items: center;
-    ">
-        {vehicles_html}
-        <span style="margin-right: 16px;">⏱ {ttt}</span>
-        <span style="margin-right: 16px;">📅 {date_str}</span>
-        <a href="{url}" target="_blank" style="color: #94a3b8; text-decoration: underline;">
-            arxiv ↗
-        </a>
-    </div>
-    """
+    return (
+        f'<div style="margin-top: 12px; padding-top: 10px; '
+        f'border-top: 1px solid rgba(120,120,140,0.18); '
+        f'font-size: 12px; color: #94a3b8; display: flex; '
+        f'flex-wrap: wrap; gap: 6px 0; align-items: center;">'
+        f'{vehicles_html}'
+        f'<span style="margin-right: 16px;">⏱ {ttt}</span>'
+        f'<span style="margin-right: 16px;">📅 {date_str}</span>'
+        f'<a href="{url}" target="_blank" '
+        f'style="color: #94a3b8; text-decoration: underline;">arxiv ↗</a>'
+        f'</div>'
+    )
 
 
 SCORE_LABELS = {
@@ -641,30 +633,22 @@ def render_news_footer(row) -> str:
     posted = row.get("posted_date", "")
     url = row.get("url", "")
     tag = row.get("llm_tag", "")
-    return f"""
-    <div style="
-        margin-top: 12px;
-        padding-top: 10px;
-        border-top: 1px solid rgba(120,120,140,0.18);
-        font-size: 12px;
-        color: #94a3b8;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px 0;
-        align-items: center;
-    ">
-        <span style="background: rgba(40,80,140,0.18); color: #93c5fd;
-                     padding: 2px 8px; border-radius: 4px; font-family: monospace;
-                     font-size: 11px; margin-right: 12px;">{src_label}</span>
-        <span style="background: rgba(120,120,140,0.12); color: #cbd5e1;
-                     padding: 2px 8px; border-radius: 4px; font-family: monospace;
-                     font-size: 11px; margin-right: 12px;">#{tag}</span>
-        <span style="margin-right: 16px;">📅 {posted}</span>
-        <a href="{url}" target="_blank" style="color: #94a3b8; text-decoration: underline;">
-            open ↗
-        </a>
-    </div>
-    """
+    return (
+        f'<div style="margin-top: 12px; padding-top: 10px; '
+        f'border-top: 1px solid rgba(120,120,140,0.18); '
+        f'font-size: 12px; color: #94a3b8; display: flex; '
+        f'flex-wrap: wrap; gap: 6px 0; align-items: center;">'
+        f'<span style="background: rgba(40,80,140,0.18); color: #93c5fd; '
+        f'padding: 2px 8px; border-radius: 4px; font-family: monospace; '
+        f'font-size: 11px; margin-right: 12px;">{src_label}</span>'
+        f'<span style="background: rgba(120,120,140,0.12); color: #cbd5e1; '
+        f'padding: 2px 8px; border-radius: 4px; font-family: monospace; '
+        f'font-size: 11px; margin-right: 12px;">#{tag}</span>'
+        f'<span style="margin-right: 16px;">📅 {posted}</span>'
+        f'<a href="{url}" target="_blank" '
+        f'style="color: #94a3b8; text-decoration: underline;">open ↗</a>'
+        f'</div>'
+    )
 
 
 def render_news_card(row) -> None:
@@ -1127,8 +1111,17 @@ def render_portfolio_tab() -> None:
             avg_cost = (total_cost / total_shares) if total_shares else 0.0
             brokers_in_group = sorted(set(g["broker"].dropna().astype(str)) - {""})
             broker_str = brokers_in_group[0] if len(brokers_in_group) == 1 else " + ".join(brokers_in_group)
-            dates = sorted(set(d for d in g["purchase_date"].astype(str) if d.strip()))
-            notes = " | ".join(sorted(set(n for n in g["notes"].astype(str) if n.strip())))
+            # Per-item str() rather than .astype(str) — pandas 3.0 leaves
+            # numeric NaN as float in some code paths, which then crashes
+            # on .strip(). str(NaN) gives "nan" which we filter out below.
+            dates = sorted({
+                s for s in (str(d) for d in g["purchase_date"])
+                if s and s != "nan" and s.strip()
+            })
+            notes = " | ".join(sorted({
+                s for s in (str(n) for n in g["notes"])
+                if s and s != "nan" and s.strip()
+            }))
             return pd.Series({
                 "broker": broker_str,
                 "shares": total_shares,
@@ -1291,16 +1284,4 @@ def main():
     # Research first since it's the established surface; News and Portfolio
     # are the newer additions. Sidebar widgets render per-tab — Streamlit
     # re-renders the sidebar on tab switch, so each tab's filters appear
-    # only when its tab is active. Widget keys are tab-prefixed
-    # (research_ / news_ / portfolio_) to dodge Streamlit's DuplicateWidgetID.
-    research_tab, news_tab, portfolio_tab = st.tabs(["Research", "News", "Portfolio"])
-    with research_tab:
-        render_research_tab()
-    with news_tab:
-        render_news_tab()
-    with portfolio_tab:
-        render_portfolio_tab()
-
-
-if __name__ == "__main__":
-    main()
+    # only when its tab is active. Widget keys are tab-pre
