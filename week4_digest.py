@@ -1086,17 +1086,31 @@ def render_portfolio_tab() -> None:
         disabled=(broker_filter != "All"),
     )
 
+    # Lazy price loading. yfinance can hang for 30+ seconds per ticker if
+    # Yahoo blocks the Streamlit Cloud IP - 49 tickers x that = blank page.
+    # User clicks button to opt in.
+    if "portfolio_prices_loaded" not in st.session_state:
+        st.session_state.portfolio_prices_loaded = False
+
     col_btn, col_caption = st.columns([1, 4])
     with col_btn:
-        if st.button("Refresh prices", key="portfolio_refresh"):
+        btn_label = "Refresh prices" if st.session_state.portfolio_prices_loaded else "Load prices"
+        if st.button(btn_label, key="portfolio_refresh"):
             _portfolio_prices.clear()
             _portfolio_history.clear()
+            st.session_state.portfolio_prices_loaded = True
             st.rerun()
     with col_caption:
-        st.caption(
-            f"{len(holdings)} position(s) - prices cached for 1h - "
-            f"yfinance available: {_yf_available()}"
-        )
+        if st.session_state.portfolio_prices_loaded:
+            st.caption(
+                f"{len(holdings)} position(s) - prices cached for 1h - "
+                f"yfinance available: {_yf_available()}"
+            )
+        else:
+            st.caption(
+                f"{len(holdings)} position(s) - click **Load prices** to fetch "
+                "current values. Skipped on initial load."
+            )
 
     # Apply rollup if requested. Rolled up = aggregate by ticker:
     #   shares = sum
@@ -1111,7 +1125,7 @@ def render_portfolio_tab() -> None:
             avg_cost = (total_cost / total_shares) if total_shares else 0.0
             brokers_in_group = sorted(set(g["broker"].dropna().astype(str)) - {""})
             broker_str = brokers_in_group[0] if len(brokers_in_group) == 1 else " + ".join(brokers_in_group)
-            # Per-item str() rather than .astype(str) — pandas 3.0 leaves
+            # Per-item str() rather than .astype(str) - pandas 3.0 leaves
             # numeric NaN as float in some code paths, which then crashes
             # on .strip(). str(NaN) gives "nan" which we filter out below.
             dates = sorted({
@@ -1146,7 +1160,10 @@ def render_portfolio_tab() -> None:
             holdings = holdings.reset_index()
 
     tickers = tuple(sorted(holdings["ticker"].unique().tolist()))
-    prices = _portfolio_prices(tickers)
+    if st.session_state.portfolio_prices_loaded:
+        prices = _portfolio_prices(tickers)
+    else:
+        prices = {t: None for t in tickers}
     holdings["current_price"] = holdings["ticker"].map(prices)
     holdings["market_value"] = holdings["shares"] * holdings["current_price"]
     holdings["cost_basis_total"] = holdings["shares"] * holdings["cost_basis_per_share"]
@@ -1238,12 +1255,20 @@ def render_portfolio_tab() -> None:
         )
         period = period_map[period_label]
 
-    hist = _portfolio_history(selected_ticker, period)
-    if hist is None or hist.empty:
-        st.info(f"No history available for {selected_ticker} over {period_label}.")
+    if not st.session_state.portfolio_prices_loaded:
+        st.info(
+            f"Price history for {selected_ticker} will load after you click "
+            "**Load prices** at the top of this tab."
+        )
+        hist = None
     else:
+        hist = _portfolio_history(selected_ticker, period)
+
+    if hist is not None and not hist.empty:
         chart_df = hist[["Close"]].rename(columns={"Close": selected_ticker})
         st.line_chart(chart_df, height=320, use_container_width=True)
+    elif st.session_state.portfolio_prices_loaded:
+        st.info(f"No history available for {selected_ticker} over {period_label}.")
 
 
 def main():
@@ -1284,4 +1309,16 @@ def main():
     # Research first since it's the established surface; News and Portfolio
     # are the newer additions. Sidebar widgets render per-tab — Streamlit
     # re-renders the sidebar on tab switch, so each tab's filters appear
-    # only when its tab is active. Widget keys are tab-pre
+    # only when its tab is active. Widget keys are tab-prefixed
+    # (research_ / news_ / portfolio_) to dodge Streamlit's DuplicateWidgetID.
+    research_tab, news_tab, portfolio_tab = st.tabs(["Research", "News", "Portfolio"])
+    with research_tab:
+        render_research_tab()
+    with news_tab:
+        render_news_tab()
+    with portfolio_tab:
+        render_portfolio_tab()
+
+
+if __name__ == "__main__":
+    main()
