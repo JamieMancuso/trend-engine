@@ -493,10 +493,32 @@ def render_shadow_portfolio() -> None:
         )
         return
 
-    # Sort by absolute % move desc — biggest movers (up or down) come first.
+    # Sort selector. Default to absolute-% movers so biggest swings (up or
+    # down) come first — that's the "did the system see it" question this
+    # whole feature is built for.
+    sort_options = {
+        "Δ% (biggest movers)":     ("__abs", False),
+        "Δ% (high → low)":         ("pct_change_since_trigger", False),
+        "Δ% (low → high)":         ("pct_change_since_trigger", True),
+        "Mentions (high → low)":   ("mention_count_at_trigger", False),
+        "Trigger date (newest)":   ("first_trigger_date", False),
+        "Trigger date (oldest)":   ("first_trigger_date", True),
+        "Ticker (A → Z)":          ("ticker", True),
+    }
+    sort_choice = st.selectbox(
+        "Sort by",
+        list(sort_options.keys()),
+        index=0,
+        key="shadow_sort",
+    )
+    sort_col, sort_asc = sort_options[sort_choice]
+
     sortable = df.copy()
-    sortable["__abs_move"] = sortable["pct_change_since_trigger"].abs().fillna(-1)
-    sortable = sortable.sort_values("__abs_move", ascending=False).drop(columns="__abs_move")
+    if sort_col == "__abs":
+        sortable["__abs_move"] = sortable["pct_change_since_trigger"].abs().fillna(-1)
+        sortable = sortable.sort_values("__abs_move", ascending=False).drop(columns="__abs_move")
+    else:
+        sortable = sortable.sort_values(by=sort_col, ascending=sort_asc, kind="stable", na_position="last")
 
     # Build a lookup of news_id -> (url, title) by scanning all news_results_*.csv
     # once per render. Cached on the file_tuple so it's fast across reruns.

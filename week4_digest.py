@@ -767,6 +767,17 @@ def render_research_tab() -> None:
     st.sidebar.markdown("---")
     st.sidebar.header("Filters")
 
+    # Free-text search across title + translation. Case-insensitive substring
+    # match. Empty string = no filter. Useful for historical lookup ("what was
+    # that fleet-scale RL paper called?").
+    research_search = st.sidebar.text_input(
+        "Search title / translation",
+        value="",
+        placeholder="e.g. fleet-scale, photonic, GaN",
+        help="Case-insensitive substring match against paper title + translation.",
+        key="research_search",
+    )
+
     all_domains = sorted(df["domain"].unique().tolist())
     selected_domains = st.sidebar.multiselect(
         "Domains", all_domains, default=all_domains, key="research_domains",
@@ -807,6 +818,13 @@ def render_research_tab() -> None:
         & df["llm_flag"].isin(selected_flags)
         & (df["llm_final"] >= min_final)
     ].copy()
+
+    # Search filter — applied after the other filters so it's relative.
+    if research_search.strip():
+        needle = research_search.strip().lower()
+        title_match = filtered["title"].astype(str).str.lower().str.contains(needle, na=False)
+        trans_match = filtered["llm_translation"].astype(str).str.lower().str.contains(needle, na=False)
+        filtered = filtered[title_match | trans_match]
 
     if require_vehicle:
         filtered = filtered[filtered["vehicles_list"].apply(lambda v: len(v) > 0)]
@@ -899,6 +917,14 @@ def render_news_tab() -> None:
     st.sidebar.markdown("---")
     st.sidebar.header("Filters")
 
+    news_search = st.sidebar.text_input(
+        "Search title / translation",
+        value="",
+        placeholder="e.g. Hormuz, OpenAI, Fed",
+        help="Case-insensitive substring match against news title + translation.",
+        key="news_search",
+    )
+
     all_sources = sorted(df["source"].dropna().unique().tolist())
     selected_sources = st.sidebar.multiselect(
         "Sources", all_sources, default=all_sources,
@@ -943,6 +969,12 @@ def render_news_tab() -> None:
         & df["llm_flag"].isin(selected_news_flags)
         & (df["llm_market_impact"].fillna(0) >= min_market)
     ].copy()
+
+    if news_search.strip():
+        needle = news_search.strip().lower()
+        title_match = filtered["title"].astype(str).str.lower().str.contains(needle, na=False)
+        trans_match = filtered["llm_translation"].astype(str).str.lower().str.contains(needle, na=False)
+        filtered = filtered[title_match | trans_match]
 
     filtered = filtered.sort_values(by=n_sort_col, ascending=n_sort_asc, kind="stable")
 
@@ -1206,13 +1238,42 @@ def render_portfolio_tab() -> None:
         total_gl_pct = 0.0
 
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Market value", f"${total_mv:,.0f}" if pd.notna(total_mv) else "-")
-    m2.metric("Cost basis", f"${total_cost:,.0f}" if pd.notna(total_cost) else "-")
+    m1.metric(
+        "Market value",
+        f"${total_mv:,.0f}" if pd.notna(total_mv) else "-",
+        help="Current shares x current price. Open positions only.",
+    )
+    m2.metric(
+        "Cost basis",
+        f"${total_cost:,.0f}" if pd.notna(total_cost) else "-",
+        help=(
+            "Cost basis of CURRENTLY HELD shares only. Not lifetime principal. "
+            "If you sold and re-bought a position, realized profits got "
+            "compounded into the new cost basis - this number will be higher "
+            "than the cash you originally put in."
+        ),
+    )
     if st.session_state.portfolio_prices_loaded and pd.notna(total_mv):
-        m3.metric("Gain/Loss $", f"${total_gl:,.0f}", f"{total_gl_pct:+.1f}%")
+        m3.metric(
+            "Gain/Loss $",
+            f"${total_gl:,.0f}",
+            f"{total_gl_pct:+.1f}%",
+            help=(
+                "Open / unrealized only: market value minus cost basis of shares "
+                "you currently hold. Does NOT include realized profits from "
+                "positions you've already sold. For lifetime account gain, "
+                "check your broker's account summary directly."
+            ),
+        )
     else:
         m3.metric("Gain/Loss $", "-")
     m4.metric("Positions", f"{len(holdings)}")
+
+    st.caption(
+        "Note: figures above reflect **open / unrealized positions only**. "
+        "Cost basis is for currently-held shares; realized gains from sold "
+        "positions are not included. Check broker app for lifetime account return."
+    )
 
     show = holdings[[
         "ticker", "broker", "shares", "cost_basis_per_share", "current_price",
