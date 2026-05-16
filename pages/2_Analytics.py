@@ -421,6 +421,28 @@ def _load_shadow_with_prices() -> pd.DataFrame:
     return sp.refresh_current_prices(df)
 
 
+@st.cache_data(show_spinner=False)
+def _load_news_url_map(file_tuple: tuple) -> dict:
+    """Build a map of news_id -> article URL by scanning all news_results_*.csv.
+    News IDs look like 'hn:48094641' or 'reuters_via_google:abc123'. The 'url'
+    column in news_results CSVs points to the actual article. Cached so we
+    only scan the files once per render."""
+    out = {}
+    for path in file_tuple:
+        try:
+            f = pd.read_csv(path)
+        except Exception:
+            continue
+        if "id" not in f.columns or "url" not in f.columns:
+            continue
+        for _, r in f.iterrows():
+            nid = str(r.get("id", "") or "").strip()
+            url = str(r.get("url", "") or "").strip()
+            if nid and url and nid not in out:
+                out[nid] = url
+    return out
+
+
 def render_shadow_portfolio() -> None:
     """
     Shadow portfolio = tickers the system surfaced 3+ times in 7 days,
@@ -472,45 +494,83 @@ def render_shadow_portfolio() -> None:
         return
 
     # Sort by absolute % move desc — biggest movers (up or down) come first.
-    # Triggers without price data sort last.
     sortable = df.copy()
     sortable["__abs_move"] = sortable["pct_change_since_trigger"].abs().fillna(-1)
     sortable = sortable.sort_values("__abs_move", ascending=False).drop(columns="__abs_move")
 
-    show = sortable[[
-        "ticker",
-        "first_trigger_date",
-        "trigger_price",
-        "current_price",
-        "pct_change_since_trigger",
-        "mention_count_at_trigger",
-        "source_breakdown",
-        "notes",
-    ]].rename(columns={
-        "first_trigger_date":       "trigger date",
-        "trigger_price":            "trigger $",
-        "current_price":            "current $",
-        "pct_change_since_trigger": "Δ %",
-        "mention_count_at_trigger": "mentions",
-        "source_breakdown":         "sources",
-    })
+    # Build a lookup of news_id -> (url, title) by scanning all news_results_*.csv
+    # once per render. Cached on the file_tuple so it's fast across reruns.
+    news_url_map = _load_news_url_map(tuple(sorted(glob.glob("news_results_*.csv"))))
 
-    st.dataframe(
-        show,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "ticker":       st.column_config.TextColumn("ticker"),
-            "trigger date": st.column_config.TextColumn("trigger date"),
-            "trigger $":    st.column_config.NumberColumn("trigger $", format="$%.2f"),
-            "current $":    st.column_config.NumberColumn("current $", format="$%.2f"),
-            "Δ %":          st.column_config.NumberColumn("Δ %", format="%+.1f%%"),
-            "mentions":     st.column_config.NumberColumn("mentions", format="%d"),
-            "sources":      st.column_config.TextColumn("sources", width="medium"),
-            "notes":        st.column_config.TextColumn("notes", width="medium"),
-        },
-        height=min(600, 60 + 35 * len(show)),
-    )
+    def _build_links_html(paper_ids_str: str) -> str:
+        """Given a semicolon-joined ID list, return HTML <a> tags for each ID.
+        Arxiv IDs link to arxiv.org. News IDs link to the article URL from
+        news_results CSVs (when found). Returns inline-HTML string."""
+        if not isinstance(paper_ids_str, str) or not paper_ids_str.strip():
+            return "<span style=\"color:#64748b;\">—</span>"
+        ids = [pid.strip() for pid in paper_ids_str.split(";") if pid.strip()]
+        links = []
+        for pid in ids:
+            if ":" in pid:
+                # News-style ID (hn:..., reuters_via_google:..., npr:..., fed:...)
+                source_key = pid.split(":", 1)[0]
+                url = news_url_map.get(pid)
+                if url:
+                    label = source_key
+                    links.append(
+                        f"<a href=\"{url}\" target=\"_blank\" "
+                        f"style=\"color:#93c5fd; text-decoration:underline; "
+                        f"margin-right:6px; font-family:monospace; font-size:12px;\">"
+                        f"{label}↗</a>"
+                    )
+                else:
+                    links.append(
+                        f"<span style=\"color:#64748b; margin-right:6px; "
+                        f"font-family:monospace; font-size:12px;\">{source_key}</span>"
+                    )
+            else:
+                # Arxiv ID — link to arxiv.org/abs/<id>
+                url = f"https://arxiv.org/abs/{pid}"
+                links.append(
+                    f"<a href=\"{url}\" target=\"_blank\" "
+                    f"style=\"color:#fdba74; text-decoration:underline; "
+                    f"margin-right:6px; font-family:monospace; font-size:12px;\">"
+                    f"arxiv↗</a>"
+                )
+        return " ".join(links)
+
+    # Header row
+    cols = st.columns([1.2, 1.4, 1.2, 1.2, 1.0, 0.8, 3.0])
+    headers = ["ticker", "trigger date", "trigger $", "current $", "Δ %", "mentions", "sources"]
+    for c, h in zip(cols, headers):
+        c.markdown(
+            f"<div style=\"font-family:monospace; font-size:11px; "
+            f"letter-spacing:0.1em; color:#64748b; text-transform:uppercase; "
+            f"border-bottom:1px solid rgba(120,120,140,0.2); padding-bottom:6px;\">"
+            f"{h}</div>",
+            unsafe_allow_html=True,
+        )
+
+    # Data rows
+    for _, row in sortable.iterrows():
+        cols = st.columns([1.2, 1.4, 1.2, 1.2, 1.0, 0.8, 3.0])
+        tp = row.get("trigger_price")
+        cp = row.get("current_price")
+        pc = row.get("pct_change_since_trigger")
+        mc = row.get("mention_count_at_trigger")
+        tp_str = f"${float(tp):.2f}" if pd.notna(tp) and str(tp).strip() not in ("", "nan") else "—"
+        cp_str = f"${float(cp):.2f}" if pd.notna(cp) else "—"
+        pc_color = "#34d399" if (pd.notna(pc) and pc > 0) else ("#f87171" if pd.notna(pc) and pc < 0 else "#64748b")
+        pc_str = (f"<span style=\"color:{pc_color};\">{pc:+.1f}%</span>"
+                  if pd.notna(pc) else "<span style=\"color:#64748b;\">—</span>")
+        cols[0].markdown(f"**{row['ticker']}**")
+        cols[1].markdown(f"<span style=\"font-family:monospace;font-size:12px;\">"
+                         f"{row['first_trigger_date']}</span>", unsafe_allow_html=True)
+        cols[2].markdown(tp_str)
+        cols[3].markdown(cp_str)
+        cols[4].markdown(pc_str, unsafe_allow_html=True)
+        cols[5].markdown(f"{int(mc)}" if pd.notna(mc) else "—")
+        cols[6].markdown(_build_links_html(row.get("paper_ids", "")), unsafe_allow_html=True)
 
 
 # ---- MAIN ------------------------------------------------------------------
