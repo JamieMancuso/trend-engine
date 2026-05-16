@@ -1159,41 +1159,59 @@ def render_portfolio_tab() -> None:
         if "ticker" not in holdings.columns:
             holdings = holdings.reset_index()
 
+    import numpy as np
+
     tickers = tuple(sorted(holdings["ticker"].unique().tolist()))
+
+    # cost_basis_total is computable without yfinance.
+    holdings["cost_basis_total"] = holdings["shares"] * holdings["cost_basis_per_share"]
+    total_cost = holdings["cost_basis_total"].sum(skipna=True)
+
     if st.session_state.portfolio_prices_loaded:
         prices = _portfolio_prices(tickers)
+        # Map None->NaN so pandas arithmetic stays in float-space and the
+        # NumberColumn renders missing cells as blank rather than literal "None".
+        holdings["current_price"] = (
+            holdings["ticker"].map(prices)
+            .apply(lambda v: float(v) if v is not None else np.nan)
+        )
+        holdings["market_value"] = holdings["shares"] * holdings["current_price"]
+        holdings["gain_loss_$"] = holdings["market_value"] - holdings["cost_basis_total"]
+
+        def _gl_pct(row):
+            cbt = row["cost_basis_total"]
+            if not isinstance(cbt, (int, float)) or cbt == 0 or pd.isna(cbt):
+                return np.nan
+            gl = row["gain_loss_$"]
+            if not isinstance(gl, (int, float)) or pd.isna(gl):
+                return np.nan
+            return (gl / cbt) * 100.0
+
+        holdings["gain_loss_pct"] = holdings.apply(_gl_pct, axis=1)
+        total_mv = holdings["market_value"].sum(skipna=True)
+        if total_mv and not pd.isna(total_mv) and total_mv > 0:
+            holdings["pct_of_total"] = holdings["market_value"] / total_mv * 100.0
+        else:
+            holdings["pct_of_total"] = np.nan
+        total_gl = total_mv - total_cost if pd.notna(total_mv) and pd.notna(total_cost) else 0.0
+        total_gl_pct = (total_gl / total_cost * 100.0) if total_cost else 0.0
     else:
-        prices = {t: None for t in tickers}
-    holdings["current_price"] = holdings["ticker"].map(prices)
-    holdings["market_value"] = holdings["shares"] * holdings["current_price"]
-    holdings["cost_basis_total"] = holdings["shares"] * holdings["cost_basis_per_share"]
-    holdings["gain_loss_$"] = holdings["market_value"] - holdings["cost_basis_total"]
-
-    def _gl_pct(row):
-        cbt = row["cost_basis_total"]
-        if not isinstance(cbt, (int, float)) or cbt == 0 or pd.isna(cbt):
-            return None
-        gl = row["gain_loss_$"]
-        if not isinstance(gl, (int, float)) or pd.isna(gl):
-            return None
-        return (gl / cbt) * 100.0
-
-    holdings["gain_loss_pct"] = holdings.apply(_gl_pct, axis=1)
-
-    total_mv = holdings["market_value"].sum(skipna=True)
-    if total_mv and not pd.isna(total_mv) and total_mv > 0:
-        holdings["pct_of_total"] = holdings["market_value"] / total_mv * 100.0
-    else:
-        holdings["pct_of_total"] = 0.0
-
-    total_cost = holdings["cost_basis_total"].sum(skipna=True)
-    total_gl = total_mv - total_cost if pd.notna(total_mv) and pd.notna(total_cost) else 0.0
-    total_gl_pct = (total_gl / total_cost * 100.0) if total_cost else 0.0
+        holdings["current_price"] = np.nan
+        holdings["market_value"] = np.nan
+        holdings["gain_loss_$"] = np.nan
+        holdings["gain_loss_pct"] = np.nan
+        holdings["pct_of_total"] = np.nan
+        total_mv = np.nan
+        total_gl = np.nan
+        total_gl_pct = 0.0
 
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Market value", f"${total_mv:,.0f}" if pd.notna(total_mv) else "-")
     m2.metric("Cost basis", f"${total_cost:,.0f}" if pd.notna(total_cost) else "-")
-    m3.metric("Gain/Loss $", f"${total_gl:,.0f}", f"{total_gl_pct:+.1f}%")
+    if st.session_state.portfolio_prices_loaded and pd.notna(total_mv):
+        m3.metric("Gain/Loss $", f"${total_gl:,.0f}", f"{total_gl_pct:+.1f}%")
+    else:
+        m3.metric("Gain/Loss $", "-")
     m4.metric("Positions", f"{len(holdings)}")
 
     show = holdings[[
