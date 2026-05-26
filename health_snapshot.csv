@@ -1,2 +1,3 @@
 date,sleep_hrs,sleep_score,sleep_deep_min,sleep_rem_min,sleep_awake_min,hrv_last_night_avg,hrv_weekly_avg,hrv_baseline_low,hrv_baseline_high,hrv_status,rhr_bpm,body_battery_low,body_battery_high,training_readiness_score,training_readiness_limiting_factor,training_status,acute_load,chronic_load,acwr,recovery_hrs,steps,avg_stress,max_stress
 2026-05-25,6.57,74,131,61,1,33,33,37,,LOW,68.0,5,5,49,,,,,,,1201,43,98
+2026-05-26,7.67,67,82,63,80,36,31,37,,LOW,65.0,5,42,45,,,,,,,86,20,63
