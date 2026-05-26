@@ -342,7 +342,8 @@ if today_g is not None:
 st.divider()
 
 # ── 14-day window ─────────────────────────────────────────────────────────────
-cutoff = today - datetime.timedelta(days=14)
+_today = latest_date if not garmin.empty else datetime.date.today()
+cutoff = _today - datetime.timedelta(days=14)
 if not df.empty:
     df14 = df[df["date"] >= cutoff].copy()
 else:
