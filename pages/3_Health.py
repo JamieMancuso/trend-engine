@@ -264,12 +264,20 @@ with col_b:
 st.divider()
 
 # ── today's readiness strip ──────────────────────────────────────────────────
-st.subheader("Today's Readiness")
+# Use the most recent row in the CSV rather than matching UTC "today" —
+# Streamlit Cloud runs UTC which is ahead of ET and would miss the latest row.
+if not garmin.empty:
+    latest_date = garmin["date"].max()
+    prev_date   = garmin[garmin["date"] < latest_date]["date"].max() if len(garmin) > 1 else None
+    today_g = garmin[garmin["date"] == latest_date].iloc[-1]
+    yest_g  = garmin[garmin["date"] == prev_date].iloc[-1] if prev_date is not None else None
+    days_stale = (datetime.date.today() - latest_date).days
+    stale_label = "" if days_stale <= 1 else f" ⚠️ {days_stale}d old"
+else:
+    today_g = yest_g = None
+    stale_label = ""
 
-today = datetime.date.today()
-today_g = garmin[garmin["date"] == today].iloc[-1] if not garmin.empty and (garmin["date"] == today).any() else None
-yest_g  = garmin[garmin["date"] == (today - datetime.timedelta(days=1))].iloc[-1] \
-          if not garmin.empty and (garmin["date"] == (today - datetime.timedelta(days=1))).any() else None
+st.subheader(f"Most Recent Readiness{stale_label}")
 
 def val(row, col):
     if row is None:
