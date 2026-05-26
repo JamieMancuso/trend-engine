@@ -21,8 +21,22 @@ import streamlit as st
 # ── page config ──────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Health", page_icon="💚", layout="wide")
 
-SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-PROJECT_DIR  = os.path.dirname(SCRIPT_DIR)
+# Resolve project root robustly — works both locally and on Streamlit Cloud.
+# On Cloud, __file__ is something like /mount/src/trend-engine/pages/3_Health.py
+# so dirname(dirname(__file__)) gives the repo root.
+# We also check the cwd as a fallback (Streamlit Cloud sets cwd = repo root).
+_SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
+_PARENT_DIR  = os.path.dirname(_SCRIPT_DIR)
+
+def _find_project_dir():
+    """Return the directory that contains health_snapshot.csv."""
+    for candidate in [_PARENT_DIR, _SCRIPT_DIR, os.getcwd()]:
+        if os.path.exists(os.path.join(candidate, "health_snapshot.csv")):
+            return candidate
+    # Default to parent (most likely on Cloud)
+    return _PARENT_DIR
+
+PROJECT_DIR  = _find_project_dir()
 SNAPSHOT_CSV = os.path.join(PROJECT_DIR, "health_snapshot.csv")
 
 # Google Sheet file ID for "Health Tracking 2026"
@@ -117,7 +131,7 @@ def load_manual_sheet() -> pd.DataFrame:
         pass
 
     # Check for a local CSV export of the sheet (written by garmin_export or manually)
-    manual_csv = os.path.join(PROJECT_DIR, "health_manual.csv")
+    manual_csv = os.path.join(_find_project_dir(), "health_manual.csv")
     if os.path.exists(manual_csv):
         df = pd.read_csv(manual_csv)
         if "date" in df.columns:
