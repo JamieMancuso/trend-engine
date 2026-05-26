@@ -21,23 +21,23 @@ import streamlit as st
 # ── page config ──────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Health", page_icon="💚", layout="wide")
 
-# Resolve project root robustly — works both locally and on Streamlit Cloud.
-# On Cloud, __file__ is something like /mount/src/trend-engine/pages/3_Health.py
-# so dirname(dirname(__file__)) gives the repo root.
-# We also check the cwd as a fallback (Streamlit Cloud sets cwd = repo root).
-_SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
-_PARENT_DIR  = os.path.dirname(_SCRIPT_DIR)
+# Resolve project root — check all plausible locations and use whichever has the file.
+# Streamlit Cloud: cwd = repo root, __file__ = /mount/src/<repo>/pages/3_Health.py
+_CANDIDATES = [
+    os.getcwd(),                                                    # Cloud: repo root
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),   # local: pages/../
+    os.path.dirname(os.path.abspath(__file__)),                    # same dir as script
+]
 
-def _find_project_dir():
-    """Return the directory that contains health_snapshot.csv."""
-    for candidate in [_PARENT_DIR, _SCRIPT_DIR, os.getcwd()]:
-        if os.path.exists(os.path.join(candidate, "health_snapshot.csv")):
-            return candidate
-    # Default to parent (most likely on Cloud)
-    return _PARENT_DIR
+def _find_file(filename):
+    for d in _CANDIDATES:
+        p = os.path.join(d, filename)
+        if os.path.exists(p):
+            return p
+    # fallback: cwd
+    return os.path.join(os.getcwd(), filename)
 
-PROJECT_DIR  = _find_project_dir()
-SNAPSHOT_CSV = os.path.join(PROJECT_DIR, "health_snapshot.csv")
+SNAPSHOT_CSV = _find_file("health_snapshot.csv")
 
 # Google Sheet file ID for "Health Tracking 2026"
 GDRIVE_FILE_ID = "14ScOHFxb-3sXGx_-YHsff2sHxHBiO5c4WDkk1vdXZZ0"
@@ -131,7 +131,7 @@ def load_manual_sheet() -> pd.DataFrame:
         pass
 
     # Check for a local CSV export of the sheet (written by garmin_export or manually)
-    manual_csv = os.path.join(_find_project_dir(), "health_manual.csv")
+    manual_csv = _find_file("health_manual.csv")
     if os.path.exists(manual_csv):
         df = pd.read_csv(manual_csv)
         if "date" in df.columns:
@@ -249,7 +249,7 @@ df     = merge_sources(garmin, manual)
 col_a, col_b = st.columns(2)
 with col_a:
     if garmin.empty:
-        st.warning("No Garmin data yet — run `garmin_export.py` once to seed health_snapshot.csv.")
+        st.warning(f"No Garmin data yet — looking for: `{SNAPSHOT_CSV}`  \nRun `garmin_export.py` once to seed it.")
     else:
         latest_garmin = garmin["date"].max()
         days_ago = (datetime.date.today() - latest_garmin).days
