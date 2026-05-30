@@ -1,0 +1,25 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:48326802,hackernews,SQLite is all you need for durable workflows,https://obeli.sk/blog/sqlite-is-all-you-need-for-durable-workflows/,tomasol,2026-05-29T17:54:50+00:00,359,205,2026-05-30T02:03:28+00:00
+hn:48324712,hackernews,The dead economy theory,https://www.owenmcgrann.com/p/the-dead-economy-theory,WillDaSilva,2026-05-29T15:46:24+00:00,708,886,2026-05-30T02:03:28+00:00
+hn:48330436,hackernews,MCP is dead?,https://www.quandri.io/engineering-blog/mcp-is-dead,nadis,2026-05-29T22:56:49+00:00,85,70,2026-05-30T02:03:28+00:00
+hn:48325340,hackernews,Notes from the Mistral AI Now Summit,https://koenvangilst.nl/lab/mistral-ai-now-summit,vnglst,2026-05-29T16:22:01+00:00,311,110,2026-05-30T02:03:28+00:00
+hn:48327962,hackernews,Shift will clean homes for free to train future robots,https://www.theverge.com/ai-artificial-intelligence/939765/ai-training-data-startup-shift-free-cleaning,evilsimon,2026-05-29T19:16:32+00:00,86,118,2026-05-30T02:03:29+00:00
+hn:48323869,hackernews,It's hard to justify buying a Framework 12,https://www.jeffgeerling.com/blog/2026/its-hard-to-justify-framework-12/,watermelon0,2026-05-29T14:55:31+00:00,226,385,2026-05-30T02:03:29+00:00
+hn:48324853,hackernews,You can just say it,https://noperator.dev/posts/you-can-just-say-it/,antirez,2026-05-29T15:54:28+00:00,219,102,2026-05-30T02:03:29+00:00
+hn:48328184,hackernews,Show HN: Tiny-vLLM – high performance LLM inference engine in C++ and CUDA,https://github.com/jmaczan/tiny-vllm,yu3zhou4,2026-05-29T19:38:27+00:00,84,7,2026-05-30T02:03:29+00:00
+hn:48323992,hackernews,Bijou64: A variable-length integer encoding,https://www.inkandswitch.com/tangents/bijou64/,justinweiss,2026-05-29T15:03:32+00:00,208,74,2026-05-30T02:03:29+00:00
+hn:48325306,hackernews,Liquid AI reveals 8B-A1B MoE trained on 38T,https://www.liquid.ai/blog/lfm2-5-8b-a1b,simjnd,2026-05-29T16:19:54+00:00,152,52,2026-05-30T02:03:29+00:00
+hn:48330882,hackernews,What Is a Dickover?,https://daringfireball.net/2026/05/what_is_a_dickover,tambourine_man,2026-05-29T23:54:22+00:00,95,38,2026-05-30T02:03:29+00:00
+hn:48327809,hackernews,On Rendering Diffs,https://pierre.computer/writing/on-rendering-diffs,amadeus,2026-05-29T19:04:54+00:00,141,43,2026-05-30T02:03:29+00:00
+hn:48330088,hackernews,Free full BGP feed. IPv4 and IPv6,https://lukasz.bromirski.net/post/bgp-w-labie-3/,pm2222,2026-05-29T22:21:58+00:00,25,7,2026-05-30T02:03:30+00:00
+hn:48309233,hackernews,"Citing 'severe' math deficits, UC faculty demand a return to SAT tests for STEM",https://www.latimes.com/california/story/2026-05-27/uc-math-professors-demand-return-of-sat-for-stem-admissions,brandonb,2026-05-28T14:13:00+00:00,475,670,2026-05-30T02:03:30+00:00
+hn:48321631,hackernews,Is AI causing a repeat of frontend’s lost decade?,https://mastrojs.github.io/blog/2026-05-23-is-AI-causing-a-repeat-of-frontends-lost-decade/,xyzal,2026-05-29T11:09:32+00:00,294,247,2026-05-30T02:03:30+00:00
+hn:48328405,hackernews,The Last Technical Interview,https://steve-yegge.medium.com/the-last-technical-interview-bc13ddcf4564,headalgorithm,2026-05-29T19:58:56+00:00,53,19,2026-05-30T02:03:30+00:00
+hn:48328365,hackernews,The California state assembly has passed the 'Protect Our Games Act',https://www.invenglobal.com/articles/22330/stop-killing-games-movement-gains-momentum-california-assembly-passes-game-protection-bill,TechTechTech,2026-05-29T19:55:56+00:00,185,188,2026-05-30T02:03:30+00:00
+hn:48317294,hackernews,The mysterious Hy3 LLM is topping OpenRouter Model Rankings by a large margin,https://minimaxir.com/2026/05/openrouter-hy3/,freediver,2026-05-29T00:09:35+00:00,106,94,2026-05-30T02:03:30+00:00
+hn:48324499,hackernews,GTA 6 Developers Unionize,https://rockstarintel.com/gta-6-developers-announce-rockstar-games-union/,AndrewKemendo,2026-05-29T15:32:55+00:00,569,394,2026-05-30T02:03:31+00:00
+hn:48326561,hackernews,Letter from the Duke of Wellington to the British Foreign Office (1809),https://wellsoc.org/society-member-pages/anecdotes-of-wellington/,backuprestore,2026-05-29T17:39:49+00:00,51,14,2026-05-30T02:03:31+00:00
+hn:48327367,hackernews,Rothko for your current weather conditions,https://rothko.joonas.wtf/,jxmorris12,2026-05-29T18:31:52+00:00,121,12,2026-05-30T02:03:31+00:00
+hn:48324910,hackernews,CAPTCHAs can still detect AI agents,https://research.roundtable.ai/captchas-detect-ai/,timshell,2026-05-29T15:57:37+00:00,64,52,2026-05-30T02:03:31+00:00
+hn:48328175,hackernews,Microsoft 0-day feud escalates as researcher threatens another exploit dump,https://www.theregister.com/security/2026/05/28/microsoft-0-day-feud-escalates-as-researcher-threatens-another-windows-exploit-dump/5248085,Cider9986,2026-05-29T19:37:41+00:00,185,58,2026-05-30T02:03:31+00:00
+hn:48322118,hackernews,We should be more tired than the model,https://vickiboykis.com/2026/05/28/we-should-be-more-tired-than-the-model/,tosh,2026-05-29T12:12:16+00:00,150,131,2026-05-30T02:03:32+00:00
