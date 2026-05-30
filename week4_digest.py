@@ -1050,6 +1050,51 @@ def _portfolio_history(ticker: str, period: str) -> pd.DataFrame:
     return _yf_history(ticker, period=period)
 
 
+# Thematic classification - operator's 8 research domains (section 4 of charter)
+# plus generic buckets for things that don't fit a research-domain story. Used
+# by the Concentration sub-tab to surface "how much of the portfolio rides on
+# each 2-year thesis." Tickers not listed here fall through to "Other".
+#
+# Single bucket per ticker (not multi-tag): keeps the math honest - % of
+# portfolio sums to 100 without double-counting. When a ticker arguably spans
+# two themes, pick the dominant thesis (e.g. CEG/VST = Energy, not AI-infra,
+# because the buy case is grid demand; if AI alone collapsed the thesis still
+# holds at lower returns).
+TICKER_THEMES = {
+    # AI - model builders, picks-and-shovels infra, hyperscalers
+    "NVDA": "AI", "GOOG": "AI", "MSFT": "AI", "ORCL": "AI",
+    "TSM":  "AI", "NBIS": "AI", "TER":  "AI", "U":    "AI",
+    # Robotics + Autonomy - humanoid, autonomy, vision
+    "TSLA": "Robotics", "RIVN": "Robotics", "RKLB": "Robotics",
+    # Energy + Critical minerals - battery materials, nuclear, fission fuel,
+    # rare earths. CEG/VST classed Energy (grid-demand thesis), not AI-infra.
+    "LAC":  "Energy", "CEG":  "Energy", "VST":  "Energy",
+    "OKLO": "Energy", "DNN":  "Energy", "UUUU": "Energy",
+    "URNJ": "Energy", "MP":   "Energy", "RIO":  "Energy", "NEM":  "Energy",
+    # Space
+    "ASTS": "Space",
+    # Health + Bio - biotech, pharma, telehealth, vaccines
+    "LLY":  "Health", "NVO":  "Health", "ABBV": "Health", "ARQT": "Health",
+    "ELV":  "Health", "OSCR": "Health", "ELTP": "Health",
+    "VXRT": "Health", "CLOV": "Health",
+    # Consumer / Cyclical - restaurants, apparel, beverage, EV-cyclical
+    "AAPL": "Consumer", "COST": "Consumer", "PZZA": "Consumer",
+    "EAT":  "Consumer", "GAP":  "Consumer", "BYND": "Consumer",
+    "CELH": "Consumer", "ROKU": "Consumer", "BYDDY": "Consumer",
+    # Financials / Real estate
+    "UWMC": "Financials", "ESNT": "Financials",
+    "XLRE": "Financials", "LAR":  "Financials",
+    # Index / ETF / Core - broad diversified holdings
+    "VT":   "Core ETF", "VOOG": "Core ETF", "IVOO": "Core ETF",
+    "INDA": "Core ETF", "GLD":  "Core ETF",
+}
+
+
+def _classify_theme(ticker: str) -> str:
+    """Return the theme bucket for a ticker, or 'Other' if not mapped."""
+    return TICKER_THEMES.get(str(ticker).upper().strip(), "Other")
+
+
 def render_portfolio_tab() -> None:
     """
     Manual-holdings view: Webull + ETrade positions driven by holdings.csv.
@@ -1275,8 +1320,32 @@ def render_portfolio_tab() -> None:
         "positions are not included. Check broker app for lifetime account return."
     )
 
+    # Theme classification applied once on the full filtered/rolled-up frame;
+    # reused by every sub-tab below.
+    holdings["theme"] = holdings["ticker"].apply(_classify_theme)
+
+    # ---- Sub-tabs ----
+    # Holdings:      existing table + per-ticker price history (familiar view)
+    # Performance:   per-ticker winners/losers + aggregated portfolio history
+    # Concentration: theme allocation + top-N + broker mix (concentrated style)
+    holdings_sub, perf_sub, conc_sub = st.tabs(
+        ["Holdings", "Performance", "Concentration"]
+    )
+
+    with holdings_sub:
+        _render_portfolio_holdings_sub(holdings, tickers)
+
+    with perf_sub:
+        _render_portfolio_performance_sub(holdings, tickers, total_cost)
+
+    with conc_sub:
+        _render_portfolio_concentration_sub(holdings, total_mv)
+
+
+def _render_portfolio_holdings_sub(holdings: pd.DataFrame, tickers: tuple) -> None:
+    """Holdings view: full table (incl. theme column) + per-ticker price history."""
     show = holdings[[
-        "ticker", "broker", "shares", "cost_basis_per_share", "current_price",
+        "ticker", "broker", "theme", "shares", "cost_basis_per_share", "current_price",
         "market_value", "gain_loss_$", "gain_loss_pct", "pct_of_total", "purchase_date", "notes",
     ]].rename(columns={
         "cost_basis_per_share": "avg cost",
@@ -1295,6 +1364,7 @@ def render_portfolio_tab() -> None:
         column_config={
             "ticker":      st.column_config.TextColumn("ticker"),
             "broker":      st.column_config.TextColumn("broker"),
+            "theme":       st.column_config.TextColumn("theme"),
             "shares":      st.column_config.NumberColumn("shares", format="%.4g"),
             "avg cost":    st.column_config.NumberColumn("avg cost", format="$%.2f"),
             "current $":   st.column_config.NumberColumn("current $", format="$%.2f"),
@@ -1348,6 +1418,307 @@ def render_portfolio_tab() -> None:
         st.line_chart(chart_df, height=320, use_container_width=True)
     elif st.session_state.portfolio_prices_loaded:
         st.info(f"No history available for {selected_ticker} over {period_label}.")
+
+
+def _render_portfolio_performance_sub(
+    holdings: pd.DataFrame, tickers: tuple, total_cost: float
+) -> None:
+    """Per-ticker winners/losers + aggregated portfolio value over time."""
+    import numpy as np
+
+    if not st.session_state.portfolio_prices_loaded:
+        st.info(
+            "Performance views need current prices. Click **Load prices** at "
+            "the top of the Portfolio tab to populate this view."
+        )
+        return
+
+    # ---- Winners / losers ----
+    st.markdown(
+        '<h3 style="margin-top:0;">Position performance</h3>',
+        unsafe_allow_html=True,
+    )
+
+    metric_choice = st.radio(
+        "Metric",
+        options=["Gain/Loss $", "Gain/Loss %"],
+        index=0,
+        horizontal=True,
+        key="portfolio_perf_metric",
+        help="Dollar gain shows where the real $ are; % shows which positions worked best per dollar invested.",
+    )
+    metric_col = "gain_loss_$" if metric_choice == "Gain/Loss $" else "gain_loss_pct"
+
+    perf = holdings.dropna(subset=[metric_col]).copy()
+    if perf.empty:
+        st.info("No positions have loaded prices yet.")
+    else:
+        perf = perf.sort_values(metric_col, ascending=False)
+
+        # Show all if <=20 positions; else top-10 winners + top-10 losers.
+        N = 10
+        if len(perf) <= 2 * N:
+            winners = perf[perf[metric_col] > 0]
+            losers = perf[perf[metric_col] <= 0].sort_values(metric_col, ascending=True)
+        else:
+            winners = perf.head(N)
+            losers = perf.tail(N).sort_values(metric_col, ascending=True)
+
+        col_w, col_l = st.columns(2)
+        with col_w:
+            st.caption(f"**Winners** - {len(winners)} position(s)")
+            if not winners.empty:
+                w_chart = winners.set_index("ticker")[[metric_col]].rename(
+                    columns={metric_col: metric_choice}
+                )
+                st.bar_chart(
+                    w_chart,
+                    height=max(180, 28 * len(winners)),
+                    use_container_width=True,
+                    horizontal=True,
+                    color="#22c55e",
+                )
+            else:
+                st.caption("No winners yet.")
+        with col_l:
+            st.caption(f"**Losers** - {len(losers)} position(s)")
+            if not losers.empty:
+                l_chart = losers.set_index("ticker")[[metric_col]].rename(
+                    columns={metric_col: metric_choice}
+                )
+                st.bar_chart(
+                    l_chart,
+                    height=max(180, 28 * len(losers)),
+                    use_container_width=True,
+                    horizontal=True,
+                    color="#ef4444",
+                )
+            else:
+                st.caption("No losers yet.")
+
+    # ---- Aggregated portfolio history ----
+    st.markdown(
+        '<h3 style="margin-top:32px;">Portfolio history</h3>',
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        "Approximation: blends **current** shares x historical close per ticker. "
+        "Reflects what today's book would have been worth at each past date, "
+        "NOT actual historical balance (shares change with buys/sells). "
+        "Cost-basis line is constant: current cost of held shares."
+    )
+
+    period_map = {"1M": "1mo", "6M": "6mo", "1Y": "1y", "5Y": "5y"}
+    period_label_p = st.radio(
+        "Period",
+        options=list(period_map.keys()),
+        index=2,
+        horizontal=True,
+        key="portfolio_history_period",
+    )
+    period_p = period_map[period_label_p]
+
+    series_list = []
+    skipped = []
+    for _, row in holdings.iterrows():
+        tk = row["ticker"]
+        shares = float(row["shares"]) if pd.notna(row["shares"]) else 0.0
+        if shares <= 0:
+            continue
+        try:
+            h = _portfolio_history(tk, period_p)
+        except Exception:
+            skipped.append(tk)
+            continue
+        if h is None or h.empty or "Close" not in h.columns:
+            skipped.append(tk)
+            continue
+        s = h["Close"].astype(float) * shares
+        s.name = tk
+        series_list.append(s)
+
+    if not series_list:
+        st.info("No history available - try **Refresh prices** at the top of the tab.")
+        return
+
+    # Outer join then forward-fill across business days. Leading NaNs stay
+    # NaN (ticker hadn't been listed yet on the index date).
+    portfolio_df = pd.concat(series_list, axis=1).sort_index()
+    portfolio_df = portfolio_df.ffill()
+    portfolio_value = portfolio_df.sum(axis=1, min_count=1).rename("Portfolio value")
+
+    cb_line = pd.Series(total_cost, index=portfolio_value.index, name="Cost basis")
+    chart_df = pd.concat([portfolio_value, cb_line], axis=1)
+    st.line_chart(
+        chart_df,
+        height=360,
+        use_container_width=True,
+        color=["#60a5fa", "#94a3b8"],
+    )
+
+    # Summary stats under chart.
+    val_clean = portfolio_value.dropna()
+    if not val_clean.empty:
+        start_v = float(val_clean.iloc[0])
+        end_v = float(val_clean.iloc[-1])
+        if start_v > 0:
+            pct = (end_v - start_v) / start_v * 100.0
+            c1, c2, c3 = st.columns(3)
+            c1.metric(f"{period_label_p} start", f"${start_v:,.0f}")
+            c2.metric(f"{period_label_p} end", f"${end_v:,.0f}")
+            c3.metric(
+                f"{period_label_p} change",
+                f"{pct:+.1f}%",
+                delta=f"${end_v - start_v:,.0f}",
+            )
+
+    if skipped:
+        with st.expander(f"{len(skipped)} ticker(s) skipped (no history)"):
+            st.caption(", ".join(sorted(skipped)))
+
+
+def _render_portfolio_concentration_sub(holdings: pd.DataFrame, total_mv: float) -> None:
+    """Theme allocation + top-N + broker mix."""
+    import numpy as np
+
+    if not st.session_state.portfolio_prices_loaded:
+        st.info(
+            "Concentration views need current prices to compute % of total. "
+            "Click **Load prices** at the top of the Portfolio tab."
+        )
+        return
+
+    if not pd.notna(total_mv) or total_mv <= 0:
+        st.info("No market value computed yet - try **Refresh prices**.")
+        return
+
+    # ---- Theme allocation ----
+    st.markdown(
+        '<h3 style="margin-top:0;">Allocation by theme</h3>',
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        "Single-bucket-per-ticker view of the operator's 8 research domains "
+        "plus generic buckets. A theme's % is the share of current market value "
+        "riding on that 2-year thesis. Unmapped tickers fall to 'Other'."
+    )
+
+    theme_agg = (
+        holdings.dropna(subset=["market_value"])
+        .groupby("theme", as_index=False)["market_value"].sum()
+        .sort_values("market_value", ascending=False)
+    )
+    theme_agg["% portfolio"] = theme_agg["market_value"] / total_mv * 100.0
+
+    theme_chart = theme_agg.set_index("theme")[["% portfolio"]]
+    st.bar_chart(
+        theme_chart,
+        height=max(240, 32 * len(theme_agg)),
+        use_container_width=True,
+        horizontal=True,
+        color="#60a5fa",
+    )
+
+    counts = holdings.groupby("theme")["ticker"].nunique().rename("positions")
+    theme_detail = theme_agg.merge(counts, on="theme", how="left").rename(
+        columns={"market_value": "value"}
+    )
+    st.dataframe(
+        theme_detail[["theme", "value", "% portfolio", "positions"]],
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "theme":       st.column_config.TextColumn("theme"),
+            "value":       st.column_config.NumberColumn("value", format="$%,.0f"),
+            "% portfolio": st.column_config.ProgressColumn(
+                "% portfolio", min_value=0, max_value=100, format="%.1f%%"),
+            "positions":   st.column_config.NumberColumn("positions", format="%d"),
+        },
+        height=min(420, 60 + 35 * len(theme_detail)),
+        key="portfolio_theme_detail",
+    )
+
+    # Flag if a meaningful slice is unmapped.
+    other_rows = theme_agg[theme_agg["theme"] == "Other"]
+    other_pct = float(other_rows["% portfolio"].sum()) if not other_rows.empty else 0.0
+    if other_pct > 5:
+        unmapped = sorted(holdings[holdings["theme"] == "Other"]["ticker"].unique().tolist())
+        st.caption(
+            f"Note: {other_pct:.1f}% of value is in 'Other' - unmapped tickers: "
+            f"{', '.join(unmapped)}. Add them to TICKER_THEMES in week4_digest.py "
+            "for cleaner allocation."
+        )
+
+    # ---- Top-N concentration ----
+    st.markdown(
+        '<h3 style="margin-top:32px;">Top-N concentration</h3>',
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        "Concentrated thematic style implies real single-name risk. "
+        "Tracks how much of the book rides on a small number of names."
+    )
+
+    top_sorted = (
+        holdings.dropna(subset=["market_value"])
+        .sort_values("market_value", ascending=False)
+        .reset_index(drop=True)
+    )
+    n_options = [1, 3, 5, 10]
+    cols = st.columns(len(n_options))
+    for col, n in zip(cols, n_options):
+        if len(top_sorted) >= n:
+            top_n_value = top_sorted.head(n)["market_value"].sum()
+            top_n_pct = top_n_value / total_mv * 100.0
+            col.metric(
+                f"Top {n}",
+                f"{top_n_pct:.1f}%",
+                help=", ".join(top_sorted.head(n)["ticker"].tolist()),
+            )
+        else:
+            col.metric(f"Top {n}", "-")
+
+    top10 = top_sorted.head(10).copy()
+    top10["% portfolio"] = top10["market_value"] / total_mv * 100.0
+    if not top10.empty:
+        top10_chart = top10.set_index("ticker")[["% portfolio"]]
+        st.bar_chart(
+            top10_chart,
+            height=max(220, 28 * len(top10)),
+            use_container_width=True,
+            horizontal=True,
+            color="#a78bfa",
+        )
+
+    # ---- Broker mix ----
+    # Skip when rolled-up view collapsed brokers into "A + B" combos -
+    # the split isn't meaningful in that case.
+    has_combo = holdings["broker"].astype(str).str.contains(r"\+", regex=True, na=False).any()
+    if not has_combo:
+        st.markdown(
+            '<h3 style="margin-top:32px;">Broker mix</h3>',
+            unsafe_allow_html=True,
+        )
+        broker_agg = (
+            holdings.dropna(subset=["market_value"])
+            .groupby("broker", as_index=False)["market_value"].sum()
+            .sort_values("market_value", ascending=False)
+        )
+        broker_agg["% portfolio"] = broker_agg["market_value"] / total_mv * 100.0
+        broker_agg = broker_agg.rename(columns={"market_value": "value"})
+        st.dataframe(
+            broker_agg,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "broker":      st.column_config.TextColumn("broker"),
+                "value":       st.column_config.NumberColumn("value", format="$%,.0f"),
+                "% portfolio": st.column_config.ProgressColumn(
+                    "% portfolio", min_value=0, max_value=100, format="%.1f%%"),
+            },
+            height=min(200, 60 + 35 * len(broker_agg)),
+            key="portfolio_broker_mix",
+        )
 
 
 def main():
