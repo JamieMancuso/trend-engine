@@ -1,0 +1,26 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:48377404,hackernews,Use your Nvidia GPU's VRAM as swap space on Linux,https://github.com/c0dejedi/nbd-vram,tanelpoder,2026-06-02T22:55:33+00:00,131,40,2026-06-03T02:06:05+00:00
+hn:48378099,hackernews,I Don't Want My Search Engine to Think for Me,https://searchzee.com/blog/search-without-ai-summaries,rajkverma123,2026-06-03T00:29:07+00:00,33,18,2026-06-03T02:06:05+00:00
+hn:48374466,hackernews,MAI-Code-1-Flash,https://microsoft.ai/news/introducingmai-code-1-flash/,EvanZhouDev,2026-06-02T18:47:07+00:00,389,178,2026-06-03T02:06:05+00:00
+hn:48375824,hackernews,CT scans of BYD car parts,https://www.lumafield.com/scan-of-the-month/byd,viasfo,2026-06-02T20:30:08+00:00,220,85,2026-06-03T02:06:05+00:00
+hn:48377761,hackernews,AI outperforms law professors in Stanford Law study,https://law.stanford.edu/press/ai-outperforms-law-professors-in-stanford-law-study/,berlianta,2026-06-02T23:43:12+00:00,91,83,2026-06-03T02:06:05+00:00
+hn:48378068,hackernews,Amazon Has Axed Its New Stargate Series,https://www.gateworld.net/news/2026/06/amazon-axed-new-stargate-series/,Kye,2026-06-03T00:23:41+00:00,23,21,2026-06-03T02:06:05+00:00
+hn:48377140,hackernews,"4K years ago, Mohenjo-daro grew more equal over time",https://archaeologymag.com/2026/05/mohenjo-daro-grew-more-equal-over-time/,marojejian,2026-06-02T22:22:34+00:00,45,22,2026-06-03T02:06:06+00:00
+hn:48377854,hackernews,More than 6 out of 10 people turn to AI for psychological support,https://www.axa.com/en/press/press-releases/2026-mind-health-report,mgh2,2026-06-02T23:55:04+00:00,52,41,2026-06-03T02:06:06+00:00
+hn:48375393,hackernews,My thoughts after using Clojure for about a month,https://www.acdw.net/clojure/,speckx,2026-06-02T19:56:46+00:00,109,58,2026-06-03T02:06:06+00:00
+hn:48375016,hackernews,"Gmail thinks I'm stupid, so I left",https://moddedbear.com/gmail-thinks-im-stupid-so-i-left,speckx,2026-06-02T19:27:40+00:00,624,395,2026-06-03T02:06:06+00:00
+hn:48369980,hackernews,A walking tour of surveillance infrastructure in Seattle (2020),https://coveillance.org/a-walking-tour-of-surveillance-infrastructure-in-seattle/,eustoria,2026-06-02T13:24:32+00:00,376,246,2026-06-03T02:06:06+00:00
+hn:48375150,hackernews,Open Repair Data Standard – Open Repair Alliance,https://openrepair.org/open-data/open-standard/,cassepipe,2026-06-02T19:37:10+00:00,91,3,2026-06-03T02:06:06+00:00
+hn:48377631,hackernews,LLMs are not the black box you were promised,https://www.jay.ai/blog/llms-are-not-a-black-box,_jayhack_,2026-06-02T23:27:30+00:00,43,24,2026-06-03T02:06:07+00:00
+hn:48374685,hackernews,HP re-releases classic computer science calculator: The HP-16C,https://hpcalcs.com/product/hp-16c-collectors-edition/,dm319,2026-06-02T19:02:40+00:00,123,77,2026-06-03T02:06:07+00:00
+hn:48372239,hackernews,How we index images for RAG,https://www.kapa.ai/blog/how-we-index-images-for-rag,mooreds,2026-06-02T16:13:41+00:00,89,14,2026-06-03T02:06:07+00:00
+hn:48372628,hackernews,Trump signs downsized AI order after weeks of reversals,https://www.politico.com/news/2026/06/02/trump-signs-downsized-ai-order-00946389,_alternator_,2026-06-02T16:40:16+00:00,175,122,2026-06-03T02:06:07+00:00
+hn:48369863,hackernews,Expanding Project Glasswing,https://www.anthropic.com/news/expanding-project-glasswing,surprisetalk,2026-06-02T13:15:14+00:00,160,209,2026-06-03T02:06:08+00:00
+hn:48367904,hackernews,Love systemd timers,https://blog.tjll.net/you-dont-love-systemd-timers-enough/,yacin,2026-06-02T09:34:11+00:00,348,226,2026-06-03T02:06:08+00:00
+hn:48370588,hackernews,Preparing for KDE Plasma's Last X11-Supported Release,https://blog.davidedmundson.co.uk/blog/596/,jandeboevrie,2026-06-02T14:16:30+00:00,148,180,2026-06-03T02:06:08+00:00
+hn:48370291,hackernews,"Fidonet: Technology, Use, Tools, and History (1993)",https://www.fidonet.org/inet92_Randy_Bush.txt,BruceEel,2026-06-02T13:53:52+00:00,150,63,2026-06-03T02:06:08+00:00
+hn:48373442,hackernews,QBE – Compiler Backend – 1.3,https://c9x.me/compile/release/qbe-1.3.html,birdculture,2026-06-02T17:37:32+00:00,78,28,2026-06-03T02:06:08+00:00
+hn:48375175,hackernews,The advertising cartel coming to your web browser,https://blog.zgp.org/the-advertising-cartel-coming-to-your-web-browser/,speckx,2026-06-02T19:39:25+00:00,129,37,2026-06-03T02:06:08+00:00
+hn:48373675,hackernews,Bringing Up DeepSeek-V4-Flash on AMD MI300X,https://fergusfinn.com/blog/deepseek-v4-flash-mi300x/,kkm,2026-06-02T17:52:48+00:00,80,7,2026-06-03T02:06:09+00:00
+hn:48377080,hackernews,Gleam v1.17.0,https://gleam.run/news/single-file-gleam-beam-programs-with-escript/,figbert,2026-06-02T22:16:20+00:00,91,7,2026-06-03T02:06:09+00:00
+hn:48377250,hackernews,Show HN: Paseo – Beautiful open-source coding agent interface,https://github.com/getpaseo/paseo,timhigins,2026-06-02T22:34:42+00:00,22,11,2026-06-03T02:06:09+00:00
