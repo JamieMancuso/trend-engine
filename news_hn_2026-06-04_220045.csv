@@ -1,0 +1,19 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:48406640,hackernews,Meta enables adb on deprecated Portal devices,https://fb.watch/HxPu0fSyeH/,jenders,2026-06-05T00:44:38+00:00,49,12,2026-06-05T02:00:46+00:00
+hn:48405931,hackernews,Do transformers need three projections? Systematic study of QKV variants,https://arxiv.org/abs/2606.04032,Anon84,2026-06-04T23:11:56+00:00,92,13,2026-06-05T02:00:46+00:00
+hn:48403980,hackernews,Anthropic's open-source framework for AI-powered vulnerability discovery,https://github.com/anthropics/defending-code-reference-harness,binyu,2026-06-04T20:11:20+00:00,268,94,2026-06-05T02:00:46+00:00
+hn:48406358,hackernews,Open Code Review – An AI-powered code review CLI tool,https://github.com/alibaba/open-code-review,geoffbp,2026-06-05T00:04:29+00:00,33,4,2026-06-05T02:00:46+00:00
+hn:48398055,hackernews,VoidZero Is Joining Cloudflare,https://blog.cloudflare.com/voidzero-joins-cloudflare/,coloneltcb,2026-06-04T13:00:51+00:00,575,258,2026-06-05T02:00:47+00:00
+hn:48400842,hackernews,When AI Builds Itself: Our progress toward recursive self-improvement,https://www.anthropic.com/institute/recursive-self-improvement,meetpateltech,2026-06-04T16:20:17+00:00,332,440,2026-06-05T02:00:47+00:00
+hn:48397028,hackernews,Ian's Secure Shoelace Knot,https://www.fieggen.com/shoelace/secureknot.htm,mooreds,2026-06-04T11:17:34+00:00,509,194,2026-06-05T02:00:48+00:00
+hn:48404905,hackernews,Queen bees emerge from special wax chambers,https://cen.acs.org/materials/biobased-materials/queen-bees-special-wax/104/web/2026/06,gmays,2026-06-04T21:31:31+00:00,45,4,2026-06-05T02:00:48+00:00
+hn:48405019,hackernews,IPv6 zones in URLs are a mistake,https://xeiaso.net/notes/2026/ipv6-zones-go-url/,xena,2026-06-04T21:42:34+00:00,85,70,2026-06-05T02:00:48+00:00
+hn:48399974,hackernews,KVarN: Native vLLM backend for KV-cache quantization by Huawei,https://github.com/huawei-csl/KVarN,theanonymousone,2026-06-04T15:18:00+00:00,114,12,2026-06-05T02:00:48+00:00
+hn:48400588,hackernews,Retro-Tech Parenting,https://havenweb.org/2026/05/28/retro-tech.html,mawise,2026-06-04T16:02:35+00:00,249,170,2026-06-05T02:00:48+00:00
+hn:48404732,hackernews,Show HN: Mercek – A Desktop IDE for AWS ECS,https://www.mercek.dev/,utibeumanah,2026-06-04T21:15:16+00:00,27,6,2026-06-05T02:00:48+00:00
+hn:48403377,hackernews,WSL 2 is getting faster Windows file system access,https://www.boxofcables.dev/wsl2-per-device-swiotlb-pools-for-virtiofs-and-virtioproxy/,haydenbarnes,2026-06-04T19:21:18+00:00,64,45,2026-06-05T02:00:49+00:00
+hn:48403753,hackernews,Castor: CERN Advanced STORage Manager,https://castor.web.cern.ch/content/home.html,naves,2026-06-04T19:52:02+00:00,43,18,2026-06-05T02:00:49+00:00
+hn:48403588,hackernews,Meta's ships facial recognition on smart glasses,https://www.buchodi.com/meta-glasses-facial-recognition/,buchodi,2026-06-04T19:36:48+00:00,228,203,2026-06-05T02:00:50+00:00
+hn:48396004,hackernews,Show HN: Uruky (EU-based Kagi alternative) now has Image Search and URL Rewrites,https://uruky.com/?il=en,BrunoBernardino,2026-06-04T08:56:10+00:00,206,194,2026-06-05T02:00:50+00:00
+hn:48396792,hackernews,Gaussian Point Splatting,https://momentsingraphics.de/Siggraph2026.html,ibobev,2026-06-04T10:48:13+00:00,176,65,2026-06-05T02:00:50+00:00
+hn:48399528,hackernews,"AI, Ashby Engineering, and the future",https://www.ashbyhq.com/blog/engineering/ai-ashby-engineering-and-the-future,fredley,2026-06-04T14:48:44+00:00,56,38,2026-06-05T02:00:51+00:00
