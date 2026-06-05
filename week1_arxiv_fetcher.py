@@ -85,6 +85,14 @@ DOMAINS = {
     "Climate":  ["physics.ao-ph"],
 }
 
+# Reverse lookup built once at import time: arXiv category -> our domain name.
+# Used by canonical_domain() to figure out which domain bucket a cross-listed
+# paper actually belongs in (based on its primary arXiv category, with
+# fall-through to secondaries if the primary isn't in any DOMAINS entry).
+CATEGORY_TO_DOMAIN: dict[str, str] = {
+    cat: domain for domain, cats in DOMAINS.items() for cat in cats
+}
+
 # How many papers to fetch per domain (so one domain can't dominate).
 MAX_RESULTS_PER_DOMAIN = 30
 
@@ -149,18 +157,74 @@ def build_arxiv_url(categories, max_results):
     return url
 
 
+# Retry tuning for arXiv fetch. arXiv's stated guideline is one request per
+# ~3 seconds for unauthenticated traffic; we use 5s between calls (see
+# fetch_all_domains) and retry an empty result up to 2 times with a 5s wait
+# in between. This costs ~10s per failed domain in the worst case and recovers
+# transient rate-limit / partial-outage cases that previously dropped the
+# whole domain silently. See charter 2026-05-19 / 2026-05-30 entries.
+MAX_FETCH_RETRIES = 2
+RETRY_BACKOFF_SECONDS = 5
+
+
+def _diagnose_empty(feed) -> str:
+    """Best-effort diagnosis when feedparser returns no entries.
+
+    feedparser.parse() does NOT raise on HTTP error - it sets feed.status
+    (HTTP code) and feed.bozo / feed.bozo_exception when the response is
+    malformed. Without this, "no results" can mean any of:
+      - arXiv legitimately returned 0 papers in the window
+      - HTTP 429 (rate limit)
+      - HTTP 503 (service unavailable)
+      - DNS / TCP failure
+      - Malformed XML
+    Returns a short human-readable tag for logging.
+    """
+    status = getattr(feed, "status", None)
+    bozo = getattr(feed, "bozo", 0)
+    bozo_exc = getattr(feed, "bozo_exception", None)
+    if status == 429:
+        return "HTTP 429 rate-limited"
+    if status == 503:
+        return "HTTP 503 service unavailable"
+    if status and status >= 400:
+        return f"HTTP {status}"
+    if bozo and bozo_exc is not None:
+        return f"malformed response ({type(bozo_exc).__name__}: {bozo_exc})"
+    if status == 200:
+        return "HTTP 200, 0 entries (likely legitimate empty result)"
+    return "no entries, no status (likely network failure)"
+
+
 def fetch_papers_for_domain(domain_name, categories, max_results):
     """
     Fetches papers for a single domain and tags each with the domain name.
     Returns a list of paper dictionaries.
+
+    Retries up to MAX_FETCH_RETRIES times if the response is empty,
+    distinguishing legitimate empty results from rate-limits / outages.
     """
     print(f"  Fetching {domain_name}...", end=" ", flush=True)
 
     url = build_arxiv_url(categories, max_results)
-    feed = feedparser.parse(url)
+    feed = None
+    diag = None
+    for attempt in range(MAX_FETCH_RETRIES + 1):
+        feed = feedparser.parse(url)
+        if feed.entries:
+            break
+        diag = _diagnose_empty(feed)
+        # If it's a clean "HTTP 200, 0 entries" result, don't bother retrying:
+        # arXiv really did say zero. Retries are for rate-limits / transient.
+        if "likely legitimate empty result" in diag:
+            break
+        if attempt < MAX_FETCH_RETRIES:
+            print(f"empty ({diag}); retry {attempt+1}/{MAX_FETCH_RETRIES} in {RETRY_BACKOFF_SECONDS}s...",
+                  end=" ", flush=True)
+            time.sleep(RETRY_BACKOFF_SECONDS)
 
     if not feed.entries:
-        print("no results (check internet connection)")
+        print(f"no results ({diag})")
         return []
 
     papers = []
@@ -171,7 +235,7 @@ def fetch_papers_for_domain(domain_name, categories, max_results):
             continue
         paper = {
             "id": arxiv_id,          # canonical arXiv ID, stable across versions
-            "domain": domain_name,   # <-- tag for filtering later
+            "domain": domain_name,   # <-- tag for filtering later (may be overridden in dedup_papers())
             "title": entry.title.replace("\n", " ").strip(),
             "authors": ", ".join(author.name for author in entry.authors),
             "published": entry.published,
@@ -185,18 +249,123 @@ def fetch_papers_for_domain(domain_name, categories, max_results):
     return papers
 
 
+def canonical_domain(categories_str: str, fallback_domain: str) -> str:
+    """
+    Pick the canonical domain for a paper based on its arXiv `categories` field.
+
+    Why this exists:
+      An arXiv paper can be cross-listed in multiple categories (e.g. a paper
+      with primary cs.RO and secondary cs.LG belongs to both Robotics and AI
+      queries). Before this dedup pass, such a paper was being fetched twice
+      and ended up in the corpus twice with different `domain` tags — causing
+      duplicate rows in results_*.csv that masked as a scorer bug for weeks
+      (see charter 2026-05-15 / 2026-05-16 entries).
+
+    Rule:
+      Walk the `categories` list in arXiv's published order. The FIRST
+      category is the paper's primary classification per arXiv convention.
+      Return the domain of the first category that appears in any DOMAINS
+      entry. If none of the categories match a known domain (defensive — the
+      paper got fetched, so SOMETHING in its categories must match), fall
+      back to whichever domain originally fetched it.
+
+    This means the assigned domain is determined by the paper's own primary
+    classification, not by the accident of which domain query happened to
+    return it first. A cs.RO-primary paper is always tagged Robotics, even
+    if AI's cs.LG query also caught it.
+
+    Args:
+        categories_str: comma-separated arXiv categories ("cs.RO, cs.LG, ...")
+        fallback_domain: the domain that originally fetched the paper; used
+                         only if no category matches any DOMAINS entry
+
+    Returns:
+        Domain name from DOMAINS keys.
+    """
+    if not categories_str:
+        return fallback_domain
+    for cat in (c.strip() for c in categories_str.split(",")):
+        if cat in CATEGORY_TO_DOMAIN:
+            return CATEGORY_TO_DOMAIN[cat]
+    return fallback_domain
+
+
+def dedup_papers(papers: list[dict]) -> list[dict]:
+    """
+    Collapse duplicate arXiv IDs in the fetched paper list.
+
+    A paper cross-listed in categories belonging to multiple DOMAINS entries
+    gets fetched once per matching domain query. This function keeps one row
+    per arXiv ID and reassigns its `domain` field via canonical_domain()
+    based on the paper's actual category list.
+
+    Order is preserved: the first occurrence of each ID stays in its
+    original position in the list (predictable for downstream group-by /
+    preview ordering).
+
+    Returns a new list; does not mutate the input.
+    """
+    seen: set[str] = set()
+    out: list[dict] = []
+    collisions = 0
+    for paper in papers:
+        pid = paper.get("id")
+        if not pid:
+            # No ID extracted (already warned about during fetch); keep as-is
+            # so we don't silently lose unparseable rows.
+            out.append(paper)
+            continue
+        if pid in seen:
+            collisions += 1
+            continue
+        seen.add(pid)
+        # Reassign domain based on primary category. For papers that weren't
+        # cross-listed (the vast majority), canonical_domain returns the same
+        # value already in `domain` — no-op.
+        chosen = canonical_domain(paper.get("categories", ""), paper["domain"])
+        if chosen != paper["domain"]:
+            # Don't mutate the caller's dict; copy then update.
+            paper = {**paper, "domain": chosen}
+        out.append(paper)
+    if collisions:
+        print(f"Deduplicated {collisions} cross-listed paper "
+              f"{'copy' if collisions == 1 else 'copies'} "
+              f"(kept {len(out)} unique).")
+    return out
+
+
+# Interval between domain fetches. arXiv asks for >=3s; we use 5s as a
+# defensive margin since the previous 3s setting was correlating with
+# silent rate-limit cascades (see charter 2026-05-30 entry).
+INTER_DOMAIN_SLEEP_SECONDS = 5
+
+
 def fetch_all_domains(domains, max_per_domain):
     """
     Loops through every domain and fetches papers for each one.
-    Sleeps 3 seconds between calls per arXiv's API guidelines.
+    Sleeps INTER_DOMAIN_SLEEP_SECONDS BEFORE each call (except the first) per
+    arXiv's API guidelines.
+
+    Sleeping BEFORE rather than AFTER matters: the previous arrangement let
+    the FIRST request fire with no pacing, which is fine in isolation but
+    bad if a prior fetch (manual run, parallel task) had recently hit the
+    same IP. Pre-call sleep guarantees pacing even across script invocations
+    that happen close in time.
+
+    Cross-listed papers (returned by more than one domain query) are
+    collapsed by dedup_papers() before return, so the result has exactly
+    one row per arXiv ID with a canonical domain assignment.
     """
     print("Fetching papers across all domains...")
     all_papers = []
-    for domain_name, categories in domains.items():
+    for i, (domain_name, categories) in enumerate(domains.items()):
+        if i > 0:
+            time.sleep(INTER_DOMAIN_SLEEP_SECONDS)   # Be a good API citizen
         papers = fetch_papers_for_domain(domain_name, categories, max_per_domain)
         all_papers.extend(papers)
-        time.sleep(3)   # Be a good API citizen
-    print(f"Total fetched: {len(all_papers)} papers\n")
+    print(f"Total fetched: {len(all_papers)} papers (pre-dedup)")
+    all_papers = dedup_papers(all_papers)
+    print(f"After dedup:   {len(all_papers)} unique papers\n")
     return all_papers
 
 
