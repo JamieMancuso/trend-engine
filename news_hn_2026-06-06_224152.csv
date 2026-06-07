@@ -1,0 +1,22 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:48430860,hackernews,An Ohio Valley 100k-Watt FM Signal Is Severed in Broad Daylight – Radio World,https://www.radioworld.com/news-and-business/headlines/an-ohio-valley-100000-watt-fm-signal-is-severed-in-broad-daylight,pkaeding,2026-06-07T01:24:15+00:00,42,28,2026-06-07T02:41:53+00:00
+hn:48428025,hackernews,Ntsc-rs – open-source video emulation of analog TV and VHS artifacts,https://ntsc.rs/,gregsadetsky,2026-06-06T19:17:46+00:00,280,67,2026-06-07T02:41:53+00:00
+hn:48416264,hackernews,Harness engineering: Leveraging Codex in an agent-first world,https://openai.com/index/harness-engineering/,pramodbiligiri,2026-06-05T18:20:06+00:00,81,42,2026-06-07T02:41:53+00:00
+hn:48430539,hackernews,Public Domain Image Archive,https://pdimagearchive.org/,davidbarker,2026-06-07T00:22:51+00:00,29,5,2026-06-07T02:41:53+00:00
+hn:48425528,hackernews,Moving beyond fork() + exec(),https://lwn.net/SubscriberLink/1076018/16f01bbbb8e0d1f0/,jwilk,2026-06-06T14:34:20+00:00,260,264,2026-06-07T02:41:54+00:00
+hn:48427643,hackernews,Meta confirms 1000s of Instagram accounts were hacked by abusing its AI chatbot,https://this.weekinsecurity.com/meta-confirms-thousands-of-instagram-accounts-were-hacked-by-abusing-its-ai-chatbot/,speckx,2026-06-06T18:35:27+00:00,450,160,2026-06-07T02:41:54+00:00
+hn:48425723,hackernews,Zeroserve: A zero-config web server you can script with eBPF,https://su3.io/posts/introducing-zeroserve,losfair,2026-06-06T14:59:43+00:00,196,51,2026-06-07T02:41:54+00:00
+hn:48424605,hackernews,Nvidia is proposing a beast of a CPU system for Windows PCs,https://twitter.com/lemire/status/2062880075117113739,tosh,2026-06-06T12:52:18+00:00,237,436,2026-06-07T02:41:54+00:00
+hn:48428475,hackernews,"Sem: New primitive for code understanding – not LSPs, but entities on top of Git",https://ataraxy-labs.github.io/sem/,rohanucla,2026-06-06T20:03:55+00:00,62,27,2026-06-07T02:41:54+00:00
+hn:48417490,hackernews,Google to pay SpaceX $920M a month for compute capacity at xAI data centers,https://www.cnbc.com/2026/06/05/google-to-pay-spacex-920-million-a-month-for-xai-compute-capacity.html,toephu2,2026-06-05T20:06:36+00:00,161,724,2026-06-07T02:41:54+00:00
+hn:48426202,hackernews,You Can Run,https://magazine.atavist.com/2026/mccann-cocaine-fugitives,bryanrasmussen,2026-06-06T15:55:46+00:00,106,59,2026-06-07T02:41:55+00:00
+hn:48423762,hackernews,Pokemon Emerald Ported to WebAssembly (100k FPS),https://pokeemerald.com/,tripplyons,2026-06-06T11:12:58+00:00,281,80,2026-06-07T02:41:55+00:00
+hn:48428647,hackernews,Computex 2026: Are We Heading for the Agentic PC Era Yet?,https://www.eetimes.com/computex-2026-are-we-heading-for-the-agentic-pc-era-yet/,rbanffy,2026-06-06T20:24:29+00:00,26,28,2026-06-07T02:41:55+00:00
+hn:48425611,hackernews,Motorola effectively bricked its entire line of WiFi routers without explanation,https://mashable.com/tech/motorola-wifi-routers-stop-working-motosync-plus-app-down,thisislife2,2026-06-06T14:43:53+00:00,76,25,2026-06-07T02:41:55+00:00
+hn:48425247,hackernews,Benchmarks in Leipzig,https://arxiv.org/abs/2606.05818,root-parent,2026-06-06T14:00:52+00:00,124,44,2026-06-07T02:41:56+00:00
+hn:48424125,hackernews,The new bibliomaniacs,https://engelsbergideas.com/notebook/the-new-bibliomaniacs/,RickJWagner,2026-06-06T12:03:21+00:00,69,62,2026-06-07T02:41:56+00:00
+hn:48428356,hackernews,"Home alone: Remote work, isolation, and mental health",https://www.science.org/doi/10.1126/science.aec7671,speckx,2026-06-06T19:51:10+00:00,130,122,2026-06-07T02:41:56+00:00
+hn:48427523,hackernews,"Pentagon raised threat of Israeli spying on U.S. to highest level, sources say",https://www.nbcnews.com/politics/national-security/pentagon-raised-threat-israeli-spying-us-highest-level-sources-say-rcna348565,MilnerRoute,2026-06-06T18:21:06+00:00,428,322,2026-06-07T02:41:56+00:00
+hn:48425347,hackernews,Running Python code in a sandbox with MicroPython and WASM,https://simonwillison.net/2026/Jun/6/micropython-in-a-sandbox/,theanonymousone,2026-06-06T14:15:32+00:00,84,26,2026-06-07T02:41:56+00:00
+hn:48428763,hackernews,New U.S. college grads now have higher unemployment than the average worker,https://www.randalolson.com/2026/06/04/recent-grad-unemployment-flip/,davidbarker,2026-06-06T20:35:40+00:00,166,168,2026-06-07T02:41:56+00:00
+hn:48424674,hackernews,Trees to Flows and Back: Unifying Decision Trees and Diffusion Models,https://arxiv.org/abs/2605.00414,rsn243,2026-06-06T12:59:59+00:00,44,8,2026-06-07T02:41:57+00:00
