@@ -20,7 +20,7 @@ PROMPT_VERSION is stamped into every scored row so we can diff scores
 across prompt revisions later without getting confused.
 """
 
-PROMPT_VERSION = "v0.4-2026-05-05"
+PROMPT_VERSION = "v0.5-2026-06-11"
 
 
 SYSTEM_PROMPT = """You are scoring arXiv paper abstracts for a personal research digest. The operator is a retail investor with a 2-year decision horizon who makes concentrated thematic bets on public equities. Your job is to identify papers that might inform a thesis he could act on in the next ~24 months.
@@ -117,6 +117,8 @@ CRITICAL: Never reference scoring dimensions, the cap rule, or scoring logic in 
 
 ## public_vehicles: list of tickers or company names
 If specific public companies are plausibly affected, name them. Empty list is the honest answer most of the time. Do NOT stretch — "benefits AI broadly so NVDA" is not a real vehicle link. Only include names where the mechanism is load-bearing.
+
+TICKER ACCURACY: Every entry MUST be formatted as "TICKER (Company Name)" — e.g. "SYM (Symbotic)", "TER (Teradyne)". Writing both forces you to verify they match. If you know the company but are not certain of its ticker, write the company name alone — a correct name beats a wrong ticker. Never guess tickers from memory of similar-looking symbols (past failures: "SYBT" emitted for Symbotic — SYBT is Stock Yards Bancorp; "ABBV" emitted for ABB — ABBV is AbbVie). If the company is private or trades only OTC/foreign, say so in parentheses instead of inventing a US ticker.
 
 ## score_explanations: one sentence per dimension
 For each scoring dimension, one plain-English sentence explaining specifically why THIS paper got that score — not a restatement of the rubric definition. Write as if explaining to the operator why he's looking at a 6 vs a 3 on that axis. Reference something concrete from the abstract.

@@ -1,10 +1,18 @@
 """
-News Scoring Prompt v0.2
+News Scoring Prompt v0.3
 -------------------------
 3-axis rubric (was 2-axis in v0.1) for news / commentary items, per
 week6_news_layer_scoping.md Decision 1. Intentionally simpler than the
 research-paper rubric — news rarely has a 5-axis structure that's
 worth scoring.
+
+CHANGE FROM v0.2 (2026-06-11, operator-requested calibration):
+- Holdings-anchoring fix: translations were force-linking nearly every
+  story back to operator holdings (LAC/NVDA specifically). Root cause:
+  6 of 9 calibration anchors mentioned LAC and/or NVDA — the model was
+  imitating the examples. Fix: (a) explicit rule that holdings are only
+  named when the link is material and non-obvious; (b) calibration
+  anchors diversified so no ticker dominates.
 
 CHANGE FROM v0.1:
 - Added market_impact axis (1-10) — measures broad-market consequence
@@ -30,7 +38,7 @@ Schema returned by the LLM (JSON only):
 Used by week7_news_scoring.py with Haiku 4.5 (per scoping Decision 5).
 """
 
-PROMPT_VERSION = "news_v0.2"
+PROMPT_VERSION = "news_v0.3"
 
 ALLOWED_TAGS = ["ai", "energy", "robotics", "bio", "macro", "career", "other"]
 ALLOWED_FLAGS = ["read", "skim", "skip"]
@@ -105,6 +113,8 @@ Plain language: what is this and why does it matter for a 2-year retail investor
 
 CRITICAL: When market_impact >= 7 AND investment_relevance < market_impact (the "operator might miss the connection" case), the translation MUST explicitly walk the chain — what's the policy/event → what's the second-order effect → which sector or named ticker is in the path.
 
+HOLDINGS DISCIPLINE: Do NOT reflexively tie stories back to the operator's current holdings. Name a specific ticker the operator holds ONLY when the story's connection to it is material and non-obvious — i.e., the story would plausibly change a thesis about that specific company within 2 years. A generic sector story does not need a holdings shout-out; "AI demand up → NVDA benefits" adds nothing. When in doubt, name the sector, not the ticker. Most translations should contain zero references to operator holdings.
+
 Skip if flag is "skip" — write "Low signal." instead.
 
 # Calibration anchors
@@ -135,7 +145,7 @@ INPUT: "Trump administration to impose 60% tariff on Chinese EVs starting Q3"
 
 INPUT: "Fed signals two rate cuts in next 6 months on weakening labor data"
 {"signal_strength": 8, "investment_relevance": 5, "market_impact": 9, "tag": "macro", "flag": "read",
- "translation": "Rate cuts compress equity discount rates broadly. Chain: lower rates → growth/long-duration tech outperforms → NVDA and AI-infra names benefit; small caps (IWM exposure) see relief; LAC and battery-material names benefit from cheaper capex financing."}
+ "translation": "Rate cuts compress equity discount rates broadly. Chain: lower rates → long-duration growth assets outperform value; small caps see financing relief; capital-intensive build-outs (data centers, mining, grid) get cheaper debt. Broad repositioning signal, not a single-name story."}
 
 INPUT: "EU passes AI Act final implementation rules; foundation model providers face €15M+ fines"
 {"signal_strength": 9, "investment_relevance": 7, "market_impact": 8, "tag": "macro", "flag": "read",
@@ -143,11 +153,11 @@ INPUT: "EU passes AI Act final implementation rules; foundation model providers 
 
 INPUT: "Saudi Arabia announces production cut extension; oil up 4%"
 {"signal_strength": 7, "investment_relevance": 4, "market_impact": 8, "tag": "macro", "flag": "read",
- "translation": "Oil price floor matters even without direct energy holdings. Chain: sustained higher oil → sticky inflation → Fed cut path slower than expected → growth-tech (NVDA exposure) gets headwind; broad-market VT modestly negative; battery/EV thesis (LAC) marginally helped as oil price gap widens."}
+ "translation": "Oil price floor matters even without direct energy holdings. Chain: sustained higher oil → sticky inflation → slower Fed cut path → headwind for long-duration growth equities; transport/airline margins compress; EV total-cost-of-ownership advantage widens as the gas-price gap grows."}
 
 INPUT: "TSMC delays Arizona Fab 3 by 12 months citing skilled labor shortage"
 {"signal_strength": 8, "investment_relevance": 8, "market_impact": 7, "tag": "macro", "flag": "read",
- "translation": "CHIPS Act execution risk now visible. Chain: domestic semiconductor reshoring slower than priced → near-term demand for ASML/AMAT capex stays concentrated in Taiwan; NVDA supply chain risk remains elevated; weakens the 'US semiconductor independence' political narrative going into next election cycle."}
+ "translation": "CHIPS Act execution risk now visible. Chain: domestic semiconductor reshoring slower than priced → fab-equipment capex (ASML/AMAT) stays concentrated in Taiwan → Taiwan-concentration risk for the whole AI compute supply chain stays elevated; weakens the 'US semiconductor independence' narrative going into next election cycle."}
 """
 
 
