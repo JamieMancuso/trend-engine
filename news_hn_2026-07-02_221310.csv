@@ -1,0 +1,27 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:48767347,hackernews,Virginia bans sale of geolocation data,https://www.hunton.com/privacy-and-cybersecurity-law-blog/virginia-bans-sale-of-geolocation-data,toomuchtodo,2026-07-02T21:03:45+00:00,500,91,2026-07-03T02:13:10+00:00
+hn:48768992,hackernews,An American Privacy Emergency,https://scottaaronson.blog/?p=9902,flowercalled,2026-07-03T00:01:06+00:00,142,39,2026-07-03T02:13:10+00:00
+hn:48768464,hackernews,"crustc: entirety of `rustc`, translated to C",https://github.com/FractalFir/crustc,Philpax,2026-07-02T22:57:35+00:00,134,27,2026-07-03T02:13:11+00:00
+hn:48768997,hackernews,GitHub is proud to announce that you can now obtain your public repo on CD-ROM,https://forms.cloud.microsoft/pages/responsepage.aspx?id=v4j5cvGGr0GRqy180BHbR6G-c11n8yFDlQmk4B-QjDxUQkdTTjZLU0EyTFFRV1E3NVRTVTRTWjRHMy4u&route=shorturl,throwaway2027,2026-07-03T00:01:26+00:00,65,46,2026-07-03T02:13:11+00:00
+hn:48765663,hackernews,Exapunks (2018),https://www.zachtronics.com/exapunks/,yu3zhou4,2026-07-02T18:41:19+00:00,221,80,2026-07-03T02:13:11+00:00
+hn:48763035,hackernews,"Since Linux 6.9, LUKS suspend stopped wiping disk-encryption keys from memory",https://mathstodon.xyz/@iblech/116769502749142438,IngoBlechschmid,2026-07-02T15:25:16+00:00,406,190,2026-07-03T02:13:11+00:00
+hn:48768336,hackernews,Mystery identity of 'Green Boots' climber is finally solved after DNA test,https://www.dailymail.com/news/article-15943905/Mystery-identity-Green-Boots-climber-macabre-landmark-frozen-ice-dying-Everest-finally-solved-DNA-test.html,FireBeyond,2026-07-02T22:44:04+00:00,56,23,2026-07-03T02:13:11+00:00
+hn:48768951,hackernews,Right to Local Intelligence,https://righttointelligence.org/,thoughtpeddler,2026-07-02T23:54:03+00:00,31,12,2026-07-03T02:13:11+00:00
+hn:48762098,hackernews,Podman v6.0.0,https://blog.podman.io/2026/07/introducing-podman-v6-0-0/,soheilpro,2026-07-02T14:23:09+00:00,400,156,2026-07-03T02:13:12+00:00
+hn:48759634,hackernews,"PeerTube is a free, decentralized and federated video platform",https://github.com/Chocobozzz/PeerTube,doener,2026-07-02T11:17:45+00:00,519,234,2026-07-03T02:13:12+00:00
+hn:48761118,hackernews,How to ask for help from people who don't know you,https://pradyuprasad.com/writings/how-to-ask-for-help/,FigurativeVoid,2026-07-02T13:19:22+00:00,396,63,2026-07-03T02:13:12+00:00
+hn:48766209,hackernews,EFF letter to FTC on X consent order (2 July 2026) [pdf],https://cdn.arstechnica.net/wp-content/uploads/2026/07/EFF-letter-to-FTC-on-X-consent-order-7-2-26.pdf,Terretta,2026-07-02T19:27:38+00:00,107,32,2026-07-03T02:13:12+00:00
+hn:48762372,hackernews,FoundationDB's Flow – Bringing Actor-Based Concurrency to C++11,https://apple.github.io/foundationdb/flow.html,sourdecor,2026-07-02T14:41:56+00:00,34,6,2026-07-03T02:13:12+00:00
+hn:48765607,hackernews,This is my attempt to get Vulkan going on NetBSD,https://github.com/segaboy/vulkan-netbsd,segaboy81,2026-07-02T18:36:09+00:00,82,18,2026-07-03T02:13:12+00:00
+hn:48765639,hackernews,Postgres transactions are a distributed systems superpower,https://www.dbos.dev/blog/co-locating-workflow-state-with-your-data,KraftyOne,2026-07-02T18:38:32+00:00,113,55,2026-07-03T02:13:13+00:00
+hn:48763246,hackernews,Show HN: zkGolf – Competitive optimization of formally verified circuits,https://zk.golf/,rot256,2026-07-02T15:40:05+00:00,39,4,2026-07-03T02:13:13+00:00
+hn:48766598,hackernews,Lightning Memory-Mapped Database Manager (LMDB) 1.0,http://www.lmdb.tech/doc/,radiator,2026-07-02T20:01:20+00:00,62,37,2026-07-03T02:13:13+00:00
+hn:48761944,hackernews,Immich 3.0,https://github.com/immich-app/immich/discussions/29439,hashier,2026-07-02T14:13:26+00:00,201,93,2026-07-03T02:13:13+00:00
+hn:48766026,hackernews,The short leash AI coding method for beating Fable,https://blog.okturtles.org/2026/07/short-leash-ai-method/,Riseed,2026-07-02T19:11:57+00:00,65,63,2026-07-03T02:13:14+00:00
+hn:48766005,hackernews,Claude-real-video － any LLM can watch a video,https://github.com/HUANGCHIHHUNGLeo/claude-real-video,cortexosmain,2026-07-02T19:10:12+00:00,82,28,2026-07-03T02:13:14+00:00
+hn:48766286,hackernews,Great Salt Lake Tracker – Grow the Flow,https://growtheflowutah.org/laketracker/,cfowles,2026-07-02T19:33:55+00:00,61,23,2026-07-03T02:13:14+00:00
+hn:48763222,hackernews,Show HN: Inkwell – An RSS reader for e-ink devices,https://kendal.codeberg.page/inkwell/,imkendal,2026-07-02T15:38:19+00:00,26,3,2026-07-03T02:13:14+00:00
+hn:48750402,hackernews,Show HN: Pieces – Social network for people,https://try.piecesof.me/,domo__knows,2026-07-01T17:30:56+00:00,30,19,2026-07-03T02:13:14+00:00
+hn:48743362,hackernews,Apricot Computers: An underrated British brand,https://dfarq.homeip.net/apricot-computers-an-underrated-british-brand/,giuliomagnifico,2026-07-01T07:26:05+00:00,22,7,2026-07-03T02:13:15+00:00
+hn:48765830,hackernews,JEP 539: Strict Field Initialization in the JVM moved to preview,https://openjdk.org/jeps/539,za3faran,2026-07-02T18:56:33+00:00,57,17,2026-07-03T02:13:15+00:00
+hn:48762862,hackernews,Launch HN: Manufact (YC S25) – MCP Cloud,https://manufact.com,pzullo,2026-07-02T15:11:20+00:00,101,62,2026-07-03T02:13:15+00:00
