@@ -1,0 +1,23 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:48811591,hackernews,Fable turned reMarkable into Tom Riddle's diary from Harry Potter,https://github.com/MaximeRivest/Riddle,modinfo,2026-07-06T23:00:24+00:00,170,102,2026-07-07T02:28:29+00:00
+hn:48812156,hackernews,How to sequence your own DNA at home,https://bradleywoolf.com/links-1/sequencing-my-own-dna-at-home,bilsbie,2026-07-07T00:14:21+00:00,64,17,2026-07-07T02:28:29+00:00
+hn:48808482,hackernews,OpenWrt One – Open Hardware Router,https://openwrt.org/toh/openwrt/one,peter_d_sherman,2026-07-06T18:23:12+00:00,456,180,2026-07-07T02:28:29+00:00
+hn:48808928,hackernews,CoMaps – FOSS Offline Maps,https://www.comaps.app/,basilikum,2026-07-06T18:55:07+00:00,331,64,2026-07-07T02:28:30+00:00
+hn:48809877,hackernews,GLM 5.2 and the coming AI margin collapse,https://martinalderson.com/posts/the-upcoming-ai-margin-collapse-part-1-glm-5-2/,martinald,2026-07-06T20:14:55+00:00,182,115,2026-07-07T02:28:30+00:00
+hn:48811644,hackernews,Ternlight – 7 MB embedding model that runs in browser (WASM),https://ternlight-demo.vercel.app/,soycaporal,2026-07-06T23:06:31+00:00,79,27,2026-07-07T02:28:30+00:00
+hn:48811887,hackernews,NSA and IETF: Fairness,https://blog.cr.yp.to/20260706-fairness.html,WatchDog,2026-07-06T23:33:54+00:00,48,21,2026-07-07T02:28:30+00:00
+hn:48808002,hackernews,A global workspace in language models,https://www.anthropic.com/research/global-workspace,in-silico,2026-07-06T17:44:08+00:00,280,100,2026-07-07T02:28:30+00:00
+hn:48809354,hackernews,Pruning RAG context down to what the answer actually needs,https://www.kapa.ai/blog/how-we-prune-rag-context,emil_sorensen,2026-07-06T19:28:24+00:00,60,5,2026-07-07T02:28:30+00:00
+hn:48804993,hackernews,Resetting Xbox,https://news.xbox.com/en-us/2026/07/06/resetting-xbox/,dijksterhuis,2026-07-06T14:18:23+00:00,489,473,2026-07-07T02:28:31+00:00
+hn:48805624,hackernews,AMD Ryzen AI Halo – $4k AI Dev Kit,https://www.lttlabs.com/articles/2026/07/06/amd-ryzen-ai-halo,LabsLucas,2026-07-06T15:01:18+00:00,280,202,2026-07-07T02:28:31+00:00
+hn:48808663,hackernews,Linux on the Atari Jaguar,https://cakehonolulu.github.io/linux-for-jaguar/,cakehonolulu,2026-07-06T18:35:54+00:00,111,19,2026-07-07T02:28:31+00:00
+hn:48811373,hackernews,OpenSSH 10.4/10.4p1 Released,https://www.openssh.org/txt/release-10.4,throw0101a,2026-07-06T22:32:58+00:00,29,7,2026-07-07T02:28:31+00:00
+hn:48811081,hackernews,Full Writeup of the Windows GDID,https://github.com/SmtimesIWndr/gdid-reversal,typeofhuman,2026-07-06T22:02:24+00:00,41,20,2026-07-07T02:28:31+00:00
+hn:48811339,hackernews,Acronym Fatigue Series Introduction: why I'm wary of acronyms,https://devz.cl/posts/acryonym-fatigue-series-why-i-m-wary-of-engineering-acronyms/,DanielVZ,2026-07-06T22:30:33+00:00,22,10,2026-07-07T02:28:32+00:00
+hn:48807225,hackernews,OfficeCLI: Office suite for AI agents to read and edit Microsoft Office files,https://github.com/iOfficeAI/OfficeCLI,maxloh,2026-07-06T16:47:44+00:00,128,36,2026-07-07T02:28:32+00:00
+hn:48810439,hackernews,Learning to code is still worthwhile,https://stevekrouse.com/learn-to-code,stevekrouse,2026-07-06T20:59:54+00:00,111,111,2026-07-07T02:28:32+00:00
+hn:48810533,hackernews,AI: The ROI Runway Could Be Long Outside the Tech Sector,https://www.apollo.com/wealth/insights-news/insights/daily-spark/ai-the-roi-runway-could-be-long-outside-the-tech-sector,u1hcw9nx,2026-07-06T21:09:23+00:00,57,49,2026-07-07T02:28:32+00:00
+hn:48804297,hackernews,Aluminum foil (2021),https://dernocua.github.io/notes/aluminum-foil.html,firephox,2026-07-06T13:28:57+00:00,243,106,2026-07-07T02:28:33+00:00
+hn:48811317,hackernews,Poly/ML – A Standard ML Implementation,https://github.com/polyml/polyml,Lyngbakr,2026-07-06T22:28:06+00:00,26,4,2026-07-07T02:28:33+00:00
+hn:48807908,hackernews,Januscape: Guest-to-Host Escape in KVM/x86 [CVE-2026-53359],https://github.com/V4bel/Januscape,Imustaskforhelp,2026-07-06T17:35:03+00:00,79,26,2026-07-07T02:28:33+00:00
+hn:48809810,hackernews,M/PC – A Concatenative OS,https://wiki.xxiivv.com/site/m_pc.html,caminanteblanco,2026-07-06T20:08:46+00:00,41,4,2026-07-07T02:28:33+00:00
