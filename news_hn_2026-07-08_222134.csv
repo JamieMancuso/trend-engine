@@ -1,0 +1,25 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:48838876,hackernews,John Deere owners will get the right to repair equipment under FTC settlement,https://apnews.com/article/john-deere-right-to-repair-agriculture-equipment-cb7514ffedb95c130a976af661f2bc02,djoldman,2026-07-08T23:37:43+00:00,333,67,2026-07-09T02:21:34+00:00
+hn:48839984,hackernews,I Think I Have LLM Burnout,https://www.alecscollon.com/blog/llm-burnout/,sosodev,2026-07-09T01:56:28+00:00,36,17,2026-07-09T02:21:34+00:00
+hn:48839434,hackernews,A software engineering interview question I like: computing the median,https://krisshamloo.com/blog/007,speckx,2026-07-09T00:38:02+00:00,45,34,2026-07-09T02:21:34+00:00
+hn:48837396,hackernews,Separating signal from noise in coding evaluations,https://openai.com/index/separating-signal-from-noise-coding-evaluations/,sk4rekr0w,2026-07-08T21:03:51+00:00,164,63,2026-07-09T02:21:35+00:00
+hn:48833116,hackernews,Chatto is now open source,https://www.hmans.dev/blog/chatto-is-open-source,speckx,2026-07-08T15:19:50+00:00,751,201,2026-07-09T02:21:35+00:00
+hn:48839397,hackernews,Remote Attestation,https://www.liamcvw.com/p/remote-attestation,lcvw,2026-07-09T00:32:33+00:00,26,12,2026-07-09T02:21:35+00:00
+hn:48832212,hackernews,Mistral's Robostral Navigate: a state of the art robotics navigation model,https://mistral.ai/news/robostral-navigate/,ottomengis,2026-07-08T14:09:17+00:00,418,96,2026-07-09T02:21:35+00:00
+hn:48829797,hackernews,Unicode's transliteration rules are Turing-complete,https://seriot.ch/computation/uts35/,beefburger,2026-07-08T09:44:20+00:00,40,10,2026-07-09T02:21:36+00:00
+hn:48834924,hackernews,"Show HN: Microsoft releases Flint, a visualization language for AI agents",https://microsoft.github.io/flint-chart/#/,chenglong-hn,2026-07-08T17:46:12+00:00,209,78,2026-07-09T02:21:36+00:00
+hn:48836233,hackernews,Cloudflare Drop,https://www.cloudflare.com/drop/,coloneltcb,2026-07-08T19:18:26+00:00,265,135,2026-07-09T02:21:36+00:00
+hn:48835111,hackernews,Grok 4.5,https://x.ai/news/grok-4-5,BoumTAC,2026-07-08T18:00:32+00:00,482,613,2026-07-09T02:21:36+00:00
+hn:48839355,hackernews,MIRA: Multiplayer Interactive World Models Trained on Rocket League,https://mira-wm.com/,ethanlipson,2026-07-09T00:27:57+00:00,20,5,2026-07-09T02:21:36+00:00
+hn:48837110,hackernews,Turning a pile of documents into a searchable useable knowledge base,https://github.com/linuxrebel/DocuBrowser,linuxrebe1,2026-07-08T20:37:29+00:00,79,15,2026-07-09T02:21:37+00:00
+hn:48838772,hackernews,"We made Grok 4.5, GPT-5.5, and Claude build the same apps",https://www.tryai.dev/blog/grok-4.5-vs-gpt-5.5-vs-claude-build-off,hershyb_,2026-07-08T23:27:14+00:00,69,29,2026-07-09T02:21:37+00:00
+hn:48816987,hackernews,Show HN: Yamanote.fun – A complete soundscape for Tokyo's Yamanote line,https://www.yamanote.fun/,madebymagnolia,2026-07-07T12:47:46+00:00,59,15,2026-07-09T02:21:37+00:00
+hn:48836778,hackernews,FAANG Simulator,https://www.abeyk.com/escape-the-rat-race/,nerdbiscuits,2026-07-08T20:05:42+00:00,291,114,2026-07-09T02:21:37+00:00
+hn:48834405,hackernews,GPT‑Live,https://openai.com/index/introducing-gpt-live/,logickkk1,2026-07-08T17:03:19+00:00,605,414,2026-07-09T02:21:37+00:00
+hn:48831587,hackernews,A bug which affected only left handed users,https://shkspr.mobi/blog/2026/07/a-bug-which-only-affected-left-handed-users/,sixhobbits,2026-07-08T13:20:05+00:00,90,44,2026-07-09T02:21:37+00:00
+hn:48836324,hackernews,New Sweden: the US's long-lost 'secret' colony,https://www.bbc.com/travel/article/20260629-new-sweden-the-uss-long-lost-secret-colony,bookofjoe,2026-07-08T19:26:18+00:00,55,8,2026-07-09T02:21:37+00:00
+hn:48833715,hackernews,TypeScript 7,https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/,DanRosenwasser,2026-07-08T16:06:35+00:00,475,186,2026-07-09T02:21:38+00:00
+hn:48829312,hackernews,Decoding the obfuscated bash script on a Uniqlo t-shirt,https://tris.sherliker.net/blog/obfuscated-self-evaluating-bash-script-by-cdn-akamai-being-supplied-to-consumers-via-retail-stores/,speerer,2026-07-08T08:46:06+00:00,1303,209,2026-07-09T02:21:38+00:00
+hn:48837877,hackernews,Rewriting Bun in Rust,https://bun.com/blog/bun-in-rust,afturner,2026-07-08T21:49:59+00:00,303,168,2026-07-09T02:21:38+00:00
+hn:48835439,hackernews,OpenMandriva: Statement regarding attempted distribution sabotage,https://forum.openmandriva.org/t/statement-regarding-attempted-distribution-sabotage/8997,workethics,2026-07-08T18:21:53+00:00,78,13,2026-07-09T02:21:38+00:00
+hn:48831565,hackernews,Cloudflare Meerkat - Globally distributed consensus,https://blog.cloudflare.com/meerkat-introduction/,bobnamob,2026-07-08T13:18:03+00:00,223,45,2026-07-09T02:21:39+00:00
