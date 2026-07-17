@@ -1,0 +1,23 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:48935342,hackernews,Kimi K3: Open Frontier Intelligence,https://www.kimi.com/blog/kimi-k3,vincent_s,2026-07-16T14:46:05+00:00,1197,746,2026-07-17T02:22:00+00:00
+hn:48936426,hackernews,Microsoft Comic Chat is now open source,https://opensource.microsoft.com/blog/2026/07/16/microsoft-comic-chat-is-now-open-source/,jervant,2026-07-16T16:06:27+00:00,551,120,2026-07-17T02:22:00+00:00
+hn:48942250,hackernews,"Google Kills Custom Search API on Jan 1, 2027",https://thenextgennexus.com/2026/05/14/google-kills-custom-search-api-on-jan-1-2027-you-have-9-months/,alexey-salmin,2026-07-17T01:03:25+00:00,43,22,2026-07-17T02:22:00+00:00
+hn:48939662,hackernews,LM Studio Bionic: the AI agent for open models,https://lmstudio.ai/blog/introducing-lm-studio-bionic,minimaxir,2026-07-16T20:18:15+00:00,164,64,2026-07-17T02:22:00+00:00
+hn:48936584,hackernews,Decoy Font,https://www.mixfont.com/experiments/decoy-font,ray__,2026-07-16T16:18:21+00:00,418,100,2026-07-17T02:22:00+00:00
+hn:48942125,hackernews,"M 3.9 Experimental Explosion – 147 Km ENE of Ponce Inlet, Florida",https://earthquake.usgs.gov/earthquakes/eventpage/us7000t13l/executive,hnburnsy,2026-07-17T00:45:05+00:00,30,8,2026-07-17T02:22:00+00:00
+hn:48939524,hackernews,$100 AI Music Video: Claude Fable 5 vs. GPT-5.6 Sol,https://www.tryai.dev/blog/ai-music-video-arena-claude-vs-gpt-5.6,hershyb_,2026-07-16T20:03:23+00:00,141,146,2026-07-17T02:22:00+00:00
+hn:48941104,hackernews,The Little Book of Reinforcement Learning,https://github.com/alxndrTL/little-book-rl/,mustaphah,2026-07-16T22:27:22+00:00,58,10,2026-07-17T02:22:01+00:00
+hn:48936451,hackernews,NotebookLM is now Gemini Notebook,https://blog.google/innovation-and-ai/products/gemini-notebook/notebooklm-gemini-notebook/,xnx,2026-07-16T16:08:13+00:00,247,127,2026-07-17T02:22:01+00:00
+hn:48939896,hackernews,Mathematics of Data Science,https://arxiv.org/abs/2607.11938,Anon84,2026-07-16T20:38:48+00:00,98,3,2026-07-17T02:22:01+00:00
+hn:48940833,hackernews,'Likweli': A new monkey species discovered in the Congo Basin,https://news.yale.edu/2026/07/15/meet-likweli-new-monkey-species-discovered-congo-basin,gmays,2026-07-16T22:00:00+00:00,49,6,2026-07-17T02:22:01+00:00
+hn:48939742,hackernews,Helium escaping from atmosphere of nearby rocky exoplanet in a habitable zone,https://www.science.org/doi/10.1126/science.aea9708,anyonecancode,2026-07-16T20:24:02+00:00,69,16,2026-07-17T02:22:01+00:00
+hn:48936880,hackernews,Detecting LLM-Generated Texts with “Classical” Machine Learning,https://blog.lyc8503.net/en/post/llm-classifier/,uneven9434,2026-07-16T16:41:37+00:00,162,107,2026-07-17T02:22:01+00:00
+hn:48940603,hackernews,Ring-Zero: Scaling Zero RL to a Trillion Parameters for Emergent Reasoning,https://arxiv.org/abs/2607.12395,binyu,2026-07-16T21:38:02+00:00,37,13,2026-07-17T02:22:01+00:00
+hn:48932539,hackernews,OnePlus halts operations in USA and Europe,https://community.oneplus.com/thread/2170715118587871237,pilililo2,2026-07-16T10:14:04+00:00,542,331,2026-07-17T02:22:02+00:00
+hn:48935951,hackernews,Immersive Linear Algebra Book with Interactive Figures (2015),https://immersivemath.com/ila/,srean,2026-07-16T15:32:23+00:00,173,26,2026-07-17T02:22:02+00:00
+hn:48933149,hackernews,How Our Rust-to-Zig Rewrite Is Going,https://rtfeldman.com/rust-to-zig,jorangreef,2026-07-16T11:39:27+00:00,413,228,2026-07-17T02:22:02+00:00
+hn:48941123,hackernews,Show HN: Mojibake – A low-level Unicode library written in C,https://mojibake.zaerl.com/,program,2026-07-16T22:29:21+00:00,39,6,2026-07-17T02:22:02+00:00
+hn:48940895,hackernews,CVE-2026-25089: FortiSandbox unauthenticated command injection added to CISA KEV,https://hellorecon.com/blog/cve-2026-25089,slvnx,2026-07-16T22:07:30+00:00,23,0,2026-07-17T02:22:02+00:00
+hn:48939641,hackernews,The privacy problems hidden in your period tracker,https://www.bbc.com/future/article/20260715-how-period-trackers-share-womens-private-details,tchalla,2026-07-16T20:15:58+00:00,74,42,2026-07-17T02:22:03+00:00
+hn:48932722,hackernews,Abstracting Effects with Continuations,https://crowdhailer.me/2026-07-15/abstracting-effects-with-continuations/,crowdhailer,2026-07-16T10:41:39+00:00,37,0,2026-07-17T02:22:03+00:00
+hn:48935687,hackernews,How to Train a Gen AI Kick Drum Model on Your Old Linux Desktop with 6GB VRAM,https://www.zhinit.dev/blog/training-a-kick-drum-diffusion-model,zhinit,2026-07-16T15:13:00+00:00,100,54,2026-07-17T02:22:03+00:00
