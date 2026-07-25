@@ -1,0 +1,23 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:49038433,hackernews,Claude Opus 5,https://www.anthropic.com/news/claude-opus-5,alvis,2026-07-24T16:57:41+00:00,1325,717,2026-07-25T02:21:33+00:00
+hn:49040296,hackernews,Postgres LISTEN/NOTIFY actually scales,https://www.dbos.dev/blog/postgres-listen-notify-scalability,KraftyOne,2026-07-24T19:05:53+00:00,209,37,2026-07-25T02:21:33+00:00
+hn:49042751,hackernews,"Sperm Whales blow bubbles to achieve restful, vertical sleep",https://news.st-andrews.ac.uk/archive/sperm-whales-blow-bubbles-to-achieve-restful-vertical-sleep/,hhs,2026-07-24T23:13:18+00:00,33,1,2026-07-25T02:21:33+00:00
+hn:49020545,hackernews,Show HN: I simulated closing the Strait of Hormuz on real oil trade data,https://globaloilnetwork.staffinganalytics.io/,eliotho,2026-07-23T12:31:21+00:00,105,46,2026-07-25T02:21:33+00:00
+hn:49034292,hackernews,My security camera shipped a GitHub admin token in its login page,https://hhh.hn/hanwha-github-token/,hhh,2026-07-24T11:54:41+00:00,515,178,2026-07-25T02:21:34+00:00
+hn:49040741,hackernews,Opus 5 is currently #1 on Artificial Analysis Intelligence Leaderboard,https://artificialanalysis.ai/models,aarondong,2026-07-24T19:45:10+00:00,149,96,2026-07-25T02:21:34+00:00
+hn:49033004,hackernews,"If coding has been solved, why does software keep getting worse?",https://ptrchm.com/posts/nothing-works-and-everyone-is-euphoric/,pchm,2026-07-24T09:08:17+00:00,551,425,2026-07-25T02:21:34+00:00
+hn:49035303,hackernews,"Nvidia, Microsoft, Meta warn against overregulating open-weight models",https://www.cnbc.com/2026/07/24/nvidia-microsoft-meta-open-weight-ai-models.html,louiereederson,2026-07-24T13:32:30+00:00,508,235,2026-07-25T02:21:35+00:00
+hn:49026933,hackernews,"Fil-C: Garbage In, Memory Safety Out [video]",https://www.youtube.com/watch?v=5F-2Y1LPRek,Bootvis,2026-07-23T19:37:37+00:00,108,99,2026-07-25T02:21:35+00:00
+hn:49024938,hackernews,Kimi K3 exploited the latest Redis server,https://twitter.com/fried_rice/status/2080059356322918777,Alifatisk,2026-07-23T17:10:02+00:00,143,40,2026-07-25T02:21:35+00:00
+hn:49034868,hackernews,Half-Life 2 running natively on HaikuOS,https://discuss.haiku-os.org/t/haiku-nvidia-porting-nvidia-driver-for-turing-gpus/16520?page=18,m0do1,2026-07-24T12:53:59+00:00,275,52,2026-07-25T02:21:35+00:00
+hn:49038298,hackernews,Don't Take the Black Pill [video],https://www.youtube.com/watch?v=zLZwpH5lCD4,signa11,2026-07-24T16:48:57+00:00,131,89,2026-07-25T02:21:35+00:00
+hn:49033240,hackernews,IRGC claims it destroyed Amazon's Bahrain data center,https://houseofsaud.com/irgc-claims-destroyed-amazon-bahrain-data-center/,thisislife2,2026-07-24T09:52:58+00:00,248,311,2026-07-25T02:21:36+00:00
+hn:49033110,hackernews,Future euro banknote design proposals,https://www.ecb.europa.eu/euro/banknotes/future_banknotes/html/all-design-proposals.en.html,robin_reala,2026-07-24T09:29:44+00:00,131,124,2026-07-25T02:21:36+00:00
+hn:49039395,hackernews,Gsxui – Shadcn-style components for Go,https://ui.gsxhq.dev/,jackielii,2026-07-24T17:59:08+00:00,56,8,2026-07-25T02:21:36+00:00
+hn:49034217,hackernews,The case for MUDs in modern times (2018),https://www.andrewzigler.com/feed/the-case-for-muds-in-modern-times,bw86,2026-07-24T11:46:40+00:00,82,69,2026-07-25T02:21:36+00:00
+hn:49038060,hackernews,Be skeptical of OpenAI's rogue hacker agent story,https://www.theguardian.com/technology/2026/jul/24/openai-rogue-hacker,rwmj,2026-07-24T16:33:31+00:00,430,234,2026-07-25T02:21:36+00:00
+hn:49041546,hackernews,Show HN: Max Studio Tools – C++ DSP Modules for Max and Ableton Live,https://github.com/apresta/max-studio-tools,apresta,2026-07-24T21:03:10+00:00,22,0,2026-07-25T02:21:37+00:00
+hn:49038045,hackernews,Unitree As2-W,https://www.unitree.com/As2-W/,MehrdadKhnzd,2026-07-24T16:32:52+00:00,96,40,2026-07-25T02:21:37+00:00
+hn:49036433,hackernews,Government orders GitHub to remove Bluetooth-based chat app Bitchat: Jack Dorsey,https://www.thehindu.com/news/national/government-orders-github-to-remove-bluetooth-based-chat-app-bitchat-over-security-concerns-jack-dorsey/article71262049.ece,rootkea,2026-07-24T14:41:59+00:00,380,281,2026-07-25T02:21:37+00:00
+hn:49034673,hackernews,Programming language file extensions that match ISO 3166-1 alpha-2 country codes,https://www.bruh.ltd/blog/programming-language-file-extensions-that-match-an-iso-3166-1-alpha-2-country-code/,speckx,2026-07-24T12:34:28+00:00,40,21,2026-07-25T02:21:37+00:00
+hn:49033099,hackernews,"Buz – A fork of Bun using modern Zig, with sub-1s incremental builds",https://ziggit.dev/t/buz-a-drop-in-replacement-for-bun-using-modern-zig-with-sub-1s-incremental-builds/16891,kristoff_it,2026-07-24T09:26:40+00:00,228,162,2026-07-25T02:21:38+00:00
