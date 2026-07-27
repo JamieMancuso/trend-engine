@@ -1,0 +1,22 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:49063754,hackernews,PGSimCity - How PostgreSQL Works,https://nikolays.github.io/PGSimCity/,jonbaer,2026-07-27T00:19:04+00:00,98,16,2026-07-27T02:08:18+00:00
+hn:49060856,hackernews,"Decker, a platform that builds on the legacy of Hypercard and classic macOS",https://beyondloom.com/decker/,tosh,2026-07-26T18:23:06+00:00,226,55,2026-07-27T02:08:19+00:00
+hn:49062291,hackernews,We have proof automation now,https://www.imperialviolet.org/2026/07/26/zstd-lean.html,zdw,2026-07-26T20:53:26+00:00,78,10,2026-07-27T02:08:19+00:00
+hn:49060495,hackernews,French firefighters face 'pyrocumulonimbus' for first time,https://www.france24.com/en/live-news/20260726-french-firefighters-face-pyrocumulonimbus-for-first-time,saaaaaam,2026-07-26T17:49:44+00:00,187,96,2026-07-27T02:08:19+00:00
+hn:49063789,hackernews,I Championed Prediction Markets. Look What They've Become,https://newsletter.platypuseconomics.com/p/i-championed-prediction-markets-look,NomNew,2026-07-27T00:25:05+00:00,20,36,2026-07-27T02:08:19+00:00
+hn:49062700,hackernews,Teaching Kids Forth,https://gracefulliberty.com/articles/teaching-kids-forth/,rbanffy,2026-07-26T21:39:17+00:00,52,16,2026-07-27T02:08:19+00:00
+hn:49063022,hackernews,US citizen charged after GrapheneOS phone wipes during airport search,https://www.techspot.com/news/113236-us-prosecutors-charge-atlanta-man-after-grapheneos-phone.html,eecc,2026-07-26T22:21:41+00:00,172,105,2026-07-27T02:08:19+00:00
+hn:49060724,hackernews,Introduction to Data-Oriented Design [pdf],https://www.gamedevs.org/uploads/introduction-to-data-oriented-design.pdf,tosh,2026-07-26T18:11:16+00:00,112,35,2026-07-27T02:08:20+00:00
+hn:49059367,hackernews,Design is compromise,https://stephango.com/design-is-compromise,ankitg12,2026-07-26T15:51:12+00:00,197,74,2026-07-27T02:08:20+00:00
+hn:49057241,hackernews,"Htmx 4.0, the first JavaScript library to release exclusively on the Game Boy",https://swag.htmx.org/en-cad/products/htmx-4-the-game,rcy,2026-07-26T12:00:11+00:00,363,113,2026-07-27T02:08:20+00:00
+hn:49061887,hackernews,Simulate cassette tape audio profiles using FFmpeg,https://github.com/AARomanov1985/Audio-Cassette-Simulation,xterminal,2026-07-26T20:02:15+00:00,73,40,2026-07-27T02:08:20+00:00
+hn:49062120,hackernews,Plasma Tunnels Reveal How Dying Satellites Fall to Earth,https://spectrum.ieee.org/space-debris-atmosphere-burn-up,marc__1,2026-07-26T20:31:57+00:00,44,25,2026-07-27T02:08:20+00:00
+hn:49059398,hackernews,"Show HN: CheapSecurity – Lightweight, Self-Hosted CCTV for Linux SBCs",https://github.com/gmrandazzo/CheapSecurity,zeldone,2026-07-26T15:53:55+00:00,106,22,2026-07-27T02:08:20+00:00
+hn:49060295,hackernews,How to Write English Prose,https://thelampmagazine.com/blog/how-to-write-english-prose,geneticdrifts,2026-07-26T17:29:35+00:00,75,41,2026-07-27T02:08:20+00:00
+hn:49060945,hackernews,How to Block Some of the Bots,https://nochan.net/b/Internet-Crap/20260606-How-To-Block-Some-Of-The-Bots/,Bender,2026-07-26T18:32:46+00:00,82,91,2026-07-27T02:08:21+00:00
+hn:49060509,hackernews,How AST-grep Rewrote Tree-sitter in Rust and Made It 30% Faster,https://astgrep.com/blog/tree-sitter-rust-rewrite,herrington_d,2026-07-26T17:51:03+00:00,72,11,2026-07-27T02:08:21+00:00
+hn:49057398,hackernews,Go Analysis Framework: modular static analysis by go team,https://pkg.go.dev/golang.org/x/tools/go/analysis,AbuAssar,2026-07-26T12:21:26+00:00,180,39,2026-07-27T02:08:21+00:00
+hn:49058993,hackernews,The relay market powering token resellers and fraud,https://vectoral.com/blog/token-relay-market,mlenhard,2026-07-26T15:17:06+00:00,155,93,2026-07-27T02:08:21+00:00
+hn:49057877,hackernews,The New AI Superpowers: Focus and Followthrough,https://www.rickmanelius.com/p/the-new-ai-superpowers-focus-and,mooreds,2026-07-26T13:13:03+00:00,145,45,2026-07-27T02:08:21+00:00
+hn:49057175,hackernews,Kill The Cookie Banner,https://killthecookiebanner.eu/,rapnie,2026-07-26T11:53:17+00:00,835,406,2026-07-27T02:08:22+00:00
+hn:49057666,hackernews,Show HN: Reverse Minesweeper,https://sunflowersgame.com/,pompomsheep,2026-07-26T12:51:03+00:00,150,50,2026-07-27T02:08:22+00:00
