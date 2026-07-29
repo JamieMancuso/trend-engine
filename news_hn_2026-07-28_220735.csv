@@ -1,0 +1,22 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:49089755,hackernews,Codex Security,https://github.com/openai/codex-security,bakigul,2026-07-28T20:52:55+00:00,349,105,2026-07-29T02:07:35+00:00
+hn:49089814,hackernews,Half-Life ported to Mac OS 9,https://mac-classic.com/news/half-life-ported-to-mac-os-9/,freediver,2026-07-28T20:58:39+00:00,155,69,2026-07-29T02:07:35+00:00
+hn:49090607,hackernews,"Show HN: I was tired of opening 2 tabs for every HN link, so I made a userscript",https://github.com/twalichiewicz/HNewhere,twalichiewicz,2026-07-28T22:09:06+00:00,127,43,2026-07-29T02:07:36+00:00
+hn:49086788,hackernews,"Substack writers, you need a website",https://elizabethtai.com/2026/06/10/substack-writers-you-need-a-website/,speckx,2026-07-28T16:58:31+00:00,418,214,2026-07-29T02:07:36+00:00
+hn:49091738,hackernews,The Difference Between a Button and a Link,https://unplannedobsolescence.com/blog/buttons-vs-links/,alexpetros,2026-07-29T00:12:14+00:00,31,13,2026-07-29T02:07:36+00:00
+hn:49091730,hackernews,Hubble: Open-source notetaking app for you and your agents,https://www.hubble.md/,handfuloflight,2026-07-29T00:11:23+00:00,33,7,2026-07-29T02:07:36+00:00
+hn:49086971,hackernews,Steel Bank Common Lisp version 2.6.7,https://sbcl.org/all-news.html?2.6.7,tmtvl,2026-07-28T17:11:54+00:00,200,84,2026-07-29T02:07:37+00:00
+hn:49091379,hackernews,ReFrame – The EPaper Camera,https://reframe.camera/,phil294,2026-07-28T23:27:09+00:00,33,8,2026-07-29T02:07:37+00:00
+hn:49085698,hackernews,Kimi K3 Architecture Overview and Notes,https://sebastianraschka.com/blog/2026/kimi-k3-architecture-notes.html,ModelForge,2026-07-28T15:48:34+00:00,316,44,2026-07-29T02:07:37+00:00
+hn:49085731,hackernews,Delayed Gratification – Proud to Be 'Last to Breaking News',https://www.slow-journalism.com/,speerer,2026-07-28T15:50:38+00:00,239,138,2026-07-29T02:07:37+00:00
+hn:49087306,hackernews,The iPhone Upgrade Program is being replaced by Apple Upgrade,https://www.apple.com/shop/iphone/iphone-upgrade-program,lkurtz,2026-07-28T17:37:12+00:00,140,269,2026-07-29T02:07:37+00:00
+hn:49085666,hackernews,Zig's Incremental Compilation Internals,https://mlugg.co.uk/posts/incremental-compilation-internals/,garyhtou,2026-07-28T15:46:45+00:00,196,139,2026-07-29T02:07:38+00:00
+hn:49089240,hackernews,Pacing the frontier,https://www.pacingthefrontier.com/,reducesuffering,2026-07-28T20:09:09+00:00,83,77,2026-07-29T02:07:38+00:00
+hn:49087091,hackernews,Discovering Cryptographic Weaknesses with Claude,https://www.anthropic.com/research/discovering-cryptographic-weaknesses,gslin,2026-07-28T17:22:16+00:00,182,125,2026-07-29T02:07:38+00:00
+hn:49083314,hackernews,New HIV vaccine shows unprecedented success in preclinical study,https://www.lji.org/news-events/news/post/new-hiv-vaccine-shows-unprecedented-success-in-preclinical-study/,codebyaditya,2026-07-28T13:12:01+00:00,568,240,2026-07-29T02:07:39+00:00
+hn:49082022,hackernews,"Kimi Linear: An Expressive, Efficient Attention Architecture (2025)",https://arxiv.org/abs/2510.26692,ronfriedhaber,2026-07-28T10:52:30+00:00,281,120,2026-07-29T02:07:39+00:00
+hn:49084813,hackernews,"Una GPS smart watch – Repairable, USB-C charging, developer-friendly",https://unawatch.com/,pimterry,2026-07-28T14:48:13+00:00,143,88,2026-07-29T02:07:39+00:00
+hn:49088058,hackernews,MCP 2026-07-28 Specification: transport going stateless,https://blog.modelcontextprotocol.io/posts/2026-07-28/,Eldodi,2026-07-28T18:35:11+00:00,105,35,2026-07-29T02:07:39+00:00
+hn:49084987,hackernews,Now is the time to give LLMs access to the ACM digital library,https://cacm.acm.org/opinion/now-is-the-time-to-give-llms-access-to-the-acm-digital-library/,rbanffy,2026-07-28T15:01:12+00:00,114,99,2026-07-29T02:07:39+00:00
+hn:49090233,hackernews,Running Kimi K3 on a M1 Max,https://github.com/gavamedia/deltafin,tito,2026-07-28T21:35:19+00:00,97,69,2026-07-29T02:07:39+00:00
+hn:49085811,hackernews,How Do I Profile eBPF Code?,https://naveensrinivasan.com/posts/2026-07-22-how-do-i-profile-ebpf-code/,snaveen,2026-07-28T15:55:44+00:00,111,6,2026-07-29T02:07:40+00:00
