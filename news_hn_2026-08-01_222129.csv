@@ -1,0 +1,17 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:49140218,hackernews,Go 1.27 Interactive Tour,https://victoriametrics.com/blog/go-1-27/index.html,Hixon10,2026-08-02T01:35:51+00:00,27,1,2026-08-02T02:21:30+00:00
+hn:49138302,hackernews,Seedance 2.5,https://seed.bytedance.com/en/blog/one-take-creation-flexible-referencing-introducing-seedance-2-5,njaremko,2026-08-01T20:45:12+00:00,191,90,2026-08-02T02:21:30+00:00
+hn:49138188,hackernews,Diátaxis,https://diataxis.fr/,ryanseys,2026-08-01T20:33:27+00:00,207,30,2026-08-02T02:21:30+00:00
+hn:49139102,hackernews,"AI financial advice is surprisingly good, especially if you ask right questions",https://mitsloan.mit.edu/ideas-made-to-matter/ai-financial-advice-surprisingly-good-especially-if-you-ask-right-questions,foxtrot8672,2026-08-01T22:25:12+00:00,171,131,2026-08-02T02:21:30+00:00
+hn:49139711,hackernews,RFC 10015: Deprecating Obsolete Key Exchange Methods in TLS 1.2 and DTLS 1.2,https://www.rfc-editor.org/rfc/rfc10015.html,Jimmc414,2026-08-01T23:44:55+00:00,26,0,2026-08-02T02:21:31+00:00
+hn:49137060,hackernews,Postmortem for Kernel Soundness Bug #14576,https://leodemoura.github.io/blog/2026-8-1-postmortem-for-kernel-soundness-bug-14576/,juhopitk,2026-08-01T18:32:20+00:00,119,41,2026-08-02T02:21:31+00:00
+hn:49139383,hackernews,Unraveling the mysteries of habit formation,https://www.kyoto-u.ac.jp/en/research-news/2026-07-28,hhs,2026-08-01T22:55:52+00:00,38,11,2026-08-02T02:21:31+00:00
+hn:49137713,hackernews,But can your calculator run Linux?,https://raymii.org/s/articles/But_can_your_calculator_run_Linux.html,jandeboevrie,2026-08-01T19:44:48+00:00,67,4,2026-08-02T02:21:31+00:00
+hn:49137228,hackernews,CISA Alert: Water Sector PLC Targeting,https://censys.com/blog/cisa-alert-water-tower-plc-targeting/,speckx,2026-08-01T18:50:17+00:00,75,49,2026-08-02T02:21:31+00:00
+hn:49134599,hackernews,The Art of 64-bit Assembly,https://nostarch.com/art-64-bit-assembly-v2,0x54MUR41,2026-08-01T14:09:00+00:00,191,86,2026-08-02T02:21:32+00:00
+hn:49136821,hackernews,How Google helped destroy adoption of RSS feeds (2023),https://openrss.org/blog/how-google-helped-destroy-adoption-of-rss-feeds,pudgywalsh,2026-08-01T18:07:07+00:00,409,146,2026-08-02T02:21:32+00:00
+hn:49133889,hackernews,RipGrep musl binaries occasionally segfault during very-large searches,https://github.com/BurntSushi/ripgrep/issues/3494,throwaway2037,2026-08-01T12:34:25+00:00,254,169,2026-08-02T02:21:32+00:00
+hn:49139304,hackernews,Anime User Interfaces,https://animeuserinterface.tumblr.com,akyuu,2026-08-01T22:47:24+00:00,100,18,2026-08-02T02:21:32+00:00
+hn:49136736,hackernews,NetBSD 11.0,https://blog.netbsd.org/tnf/entry/netbsd_11_0_released,jaypatelani,2026-08-01T17:56:41+00:00,219,95,2026-08-02T02:21:33+00:00
+hn:49135245,hackernews,Explorative modeling: Train on the best of K guesses,https://alexiglad.github.io/blog/2026/explorative_modeling/,DSemba,2026-08-01T15:23:15+00:00,77,23,2026-08-02T02:21:33+00:00
+hn:49135426,hackernews,Kenji/Serious Eats – 30-Min Pressure Cooker Pho Ga,https://www.seriouseats.com/30-minute-pressure-cooker-pho-ga-recipe,stasomatic,2026-08-01T15:46:54+00:00,103,63,2026-08-02T02:21:33+00:00
