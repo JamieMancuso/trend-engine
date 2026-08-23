@@ -49,6 +49,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+import hub_theme
+
 
 # ---- CONFIG (edit defaults here) -------------------------------------------
 
@@ -58,12 +60,7 @@ DEFAULT_SORT = "Final score (high → low)"
 
 # Color tiers for the final-score badge. Refined editorial palette —
 # warm amber for thesis, slate for watchlist, faded gray for skip.
-FLAG_COLORS = {
-    "thesis":    {"bg": "#7c2d12", "fg": "#fed7aa"},   # deep amber
-    "watchlist": {"bg": "#1e293b", "fg": "#cbd5e1"},   # slate
-    "longshot":  {"bg": "#1e3a2f", "fg": "#6ee7b7"},   # deep green — long horizon
-    "skip":      {"bg": "#27272a", "fg": "#71717a"},   # muted graphite
-}
+FLAG_COLORS = hub_theme.FLAG_COLORS   # HUB-64 palette (see hub_theme.py)
 
 
 # ---- DATA LOADING ----------------------------------------------------------
@@ -219,15 +216,17 @@ def render_score_badge(final: float, flag: str) -> str:
     <div style="
         background: {colors['bg']};
         color: {colors['fg']};
-        border-radius: 12px;
-        padding: 14px 18px;
+        padding: 13px 10px;
         text-align: center;
-        font-family: 'Georgia', serif;
+        font-family: 'Doto', ui-monospace, monospace;
         min-width: 92px;
+        clip-path: polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),
+                   calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px);
     ">
-        <div style="font-size: 32px; font-weight: 700; line-height: 1;">{final:g}</div>
-        <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-                    opacity: 0.85; margin-top: 4px;">{flag}</div>
+        <div style="font-size: 34px; font-weight: 700; line-height: 1;">{final:g}</div>
+        <div style="font-size: 9px; font-weight: 900; letter-spacing: 0.08em;
+                    text-transform: uppercase; opacity: 0.9; margin-top: 5px;
+                    white-space: nowrap;">{flag}</div>
     </div>
     """
 
@@ -310,7 +309,7 @@ def render_footer(row) -> str:
     vehicles_html = ""
     if vehicles:
         chips = " ".join(
-            f'<span style="background: rgba(124,45,18,0.18); color: #fdba74; '
+            f'<span style="background: rgba(242,216,75,0.14); color: #f2d84b; '
             f'padding: 2px 8px; border-radius: 4px; font-family: monospace; '
             f'font-size: 12px; margin-right: 4px;">{v}</span>'
             for v in vehicles
@@ -324,13 +323,13 @@ def render_footer(row) -> str:
     return (
         f'<div style="margin-top: 12px; padding-top: 10px; '
         f'border-top: 1px solid rgba(120,120,140,0.18); '
-        f'font-size: 12px; color: #94a3b8; display: flex; '
+        f'font-size: 12px; color: #8592a8; display: flex; '
         f'flex-wrap: wrap; gap: 6px 0; align-items: center;">'
         f'{vehicles_html}'
         f'<span style="margin-right: 16px;">⏱ {ttt}</span>'
         f'<span style="margin-right: 16px;">📅 {date_str}</span>'
         f'<a href="{url}" target="_blank" '
-        f'style="color: #94a3b8; text-decoration: underline;">arxiv ↗</a>'
+        f'style="color: #8592a8; text-decoration: underline;">arxiv ↗</a>'
         f'</div>'
     )
 
@@ -374,9 +373,9 @@ def render_detail(row) -> None:
     with col_title:
         st.markdown(
             f'<div style="font-family: monospace; font-size: 11px; letter-spacing: 0.15em; '
-            f'color: #64748b; text-transform: uppercase; margin-bottom: 6px;">{row["domain"]}</div>'
+            f'color: #5c6678; text-transform: uppercase; margin-bottom: 6px;">{row["domain"]}</div>'
             f'<div style="font-family: Georgia, serif; font-size: 24px; line-height: 1.3; '
-            f'font-weight: 600; color: #e2e8f0;">{row["title"]}</div>',
+            f'font-weight: 600; color: #eef4f8;">{row["title"]}</div>',
             unsafe_allow_html=True,
         )
 
@@ -385,7 +384,7 @@ def render_detail(row) -> None:
 
     # Translation
     st.markdown(
-        f'<div style="font-size: 15px; line-height: 1.6; color: #cbd5e1; '
+        f'<div style="font-size: 15px; line-height: 1.6; color: #c9d3e0; '
         f'margin-bottom: 32px;">{row["llm_translation"]}</div>',
         unsafe_allow_html=True,
     )
@@ -393,7 +392,7 @@ def render_detail(row) -> None:
     # Score breakdown — definition + paper-specific explanation per axis
     st.markdown(
         '<div style="font-family: Georgia, serif; font-size: 18px; '
-        'color: #e2e8f0; margin-bottom: 16px;">Score Breakdown</div>',
+        'color: #eef4f8; margin-bottom: 16px;">Score Breakdown</div>',
         unsafe_allow_html=True,
     )
 
@@ -428,16 +427,16 @@ def render_detail(row) -> None:
         ">
             <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px;">
                 <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px;
-                             letter-spacing: 0.12em; color: #64748b;">{abbr}</span>
+                             letter-spacing: 0.12em; color: #5c6678;">{abbr}</span>
                 <span style="font-family: Georgia, serif; font-size: 16px;
-                             color: #e2e8f0; font-weight: 600;">{label}</span>
+                             color: #eef4f8; font-weight: 600;">{label}</span>
                 <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px;
-                             color: #e2e8f0; font-weight: 700; margin-left: auto;">{int(val)}</span>
+                             color: #eef4f8; font-weight: 700; margin-left: auto;">{int(val)}</span>
             </div>
-            <div style="font-size: 12px; color: #64748b; margin-bottom: {"8px" if explanation else "0"};">
+            <div style="font-size: 12px; color: #5c6678; margin-bottom: {"8px" if explanation else "0"};">
                 {tooltip}
             </div>
-            {"" if not explanation else f'<div style="font-size: 13px; color: #94a3b8; font-style: italic; border-top: 1px solid rgba(120,120,140,0.15); padding-top: 8px;">{explanation}</div>'}
+            {"" if not explanation else f'<div style="font-size: 13px; color: #8592a8; font-style: italic; border-top: 1px solid rgba(120,120,140,0.15); padding-top: 8px;">{explanation}</div>'}
         </div>
         """, unsafe_allow_html=True)
 
@@ -465,7 +464,7 @@ def render_card(row) -> None:
             # Domain tag
             st.markdown(
                 f'<div style="font-family: monospace; font-size: 11px; '
-                f'letter-spacing: 0.15em; color: #64748b; '
+                f'letter-spacing: 0.15em; color: #5c6678; '
                 f'text-transform: uppercase; margin-bottom: 4px;">{row["domain"]}</div>',
                 unsafe_allow_html=True,
             )
@@ -484,7 +483,7 @@ def render_card(row) -> None:
 
             # Translation — the most important field
             st.markdown(
-                f'<div style="font-size: 14px; line-height: 1.55; color: #cbd5e1;">'
+                f'<div style="font-size: 14px; line-height: 1.55; color: #c9d3e0;">'
                 f'{row["llm_translation"]}</div>',
                 unsafe_allow_html=True,
             )
@@ -518,9 +517,9 @@ NEWS_SOURCE_LABELS = {
 # Flag colors for news cards. Different palette from research flags so the
 # eye doesn't conflate "thesis" with "read" (different action implications).
 NEWS_FLAG_COLORS = {
-    "read": {"bg": "#1e3a5f", "fg": "#bfdbfe"},   # deep blue — primary action
-    "skim": {"bg": "#1e293b", "fg": "#cbd5e1"},   # slate
-    "skip": {"bg": "#27272a", "fg": "#71717a"},   # graphite
+    "read": {"bg": "#0c1a1a", "fg": hub_theme.TEAL},    # teal — primary action
+    "skim": {"bg": "#10131d", "fg": hub_theme.DIM},     # slate
+    "skip": {"bg": "#10131d", "fg": hub_theme.MUTED},   # graphite
 }
 
 
@@ -609,7 +608,7 @@ def render_news_subscores(row) -> str:
             continue
         v = int(val)
         opacity = "0.45" if v < 4 else "0.95"
-        bg = "rgba(40,80,140,0.18)" if label == "MKT" else "rgba(120,120,140,0.12)"
+        bg = "rgba(95,179,179,0.16)" if label == "MKT" else "rgba(120,120,140,0.12)"
         tip_safe = tip.replace('"', "&quot;")
         pills.append(f"""
             <span title="{tip_safe}" style="
@@ -636,17 +635,17 @@ def render_news_footer(row) -> str:
     return (
         f'<div style="margin-top: 12px; padding-top: 10px; '
         f'border-top: 1px solid rgba(120,120,140,0.18); '
-        f'font-size: 12px; color: #94a3b8; display: flex; '
+        f'font-size: 12px; color: #8592a8; display: flex; '
         f'flex-wrap: wrap; gap: 6px 0; align-items: center;">'
-        f'<span style="background: rgba(40,80,140,0.18); color: #93c5fd; '
+        f'<span style="background: rgba(95,179,179,0.16); color: #5fb3b3; '
         f'padding: 2px 8px; border-radius: 4px; font-family: monospace; '
         f'font-size: 11px; margin-right: 12px;">{src_label}</span>'
-        f'<span style="background: rgba(120,120,140,0.12); color: #cbd5e1; '
+        f'<span style="background: rgba(120,120,140,0.12); color: #c9d3e0; '
         f'padding: 2px 8px; border-radius: 4px; font-family: monospace; '
         f'font-size: 11px; margin-right: 12px;">#{tag}</span>'
         f'<span style="margin-right: 16px;">📅 {posted}</span>'
         f'<a href="{url}" target="_blank" '
-        f'style="color: #94a3b8; text-decoration: underline;">open ↗</a>'
+        f'style="color: #8592a8; text-decoration: underline;">open ↗</a>'
         f'</div>'
     )
 
@@ -667,7 +666,7 @@ def render_news_card(row) -> None:
             # Tag/source row above the title — quick visual filter cue
             st.markdown(
                 f'<div style="font-family: monospace; font-size: 11px; '
-                f'letter-spacing: 0.15em; color: #64748b; '
+                f'letter-spacing: 0.15em; color: #5c6678; '
                 f'text-transform: uppercase; margin-bottom: 4px;">'
                 f'{NEWS_SOURCE_LABELS.get(row.get("source", ""), row.get("source", ""))}'
                 f' · {row.get("llm_tag", "")}'
@@ -682,7 +681,7 @@ def render_news_card(row) -> None:
             st.markdown(
                 f'<div style="font-family: Georgia, serif; font-size: 18px; '
                 f'line-height: 1.35; font-weight: 600; margin-bottom: 4px;">'
-                f'<a href="{url}" target="_blank" style="color: #e2e8f0; text-decoration: none;">'
+                f'<a href="{url}" target="_blank" style="color: #eef4f8; text-decoration: none;">'
                 f'{title}</a></div>',
                 unsafe_allow_html=True,
             )
@@ -692,7 +691,7 @@ def render_news_card(row) -> None:
             # Translation — the LLM's "why this matters" sentence
             translation = row.get("llm_translation", "")
             st.markdown(
-                f'<div style="font-size: 14px; line-height: 1.55; color: #cbd5e1;">'
+                f'<div style="font-size: 14px; line-height: 1.55; color: #c9d3e0;">'
                 f'{translation}</div>',
                 unsafe_allow_html=True,
             )
@@ -1107,7 +1106,7 @@ def render_portfolio_tab() -> None:
     """
     st.markdown(
         '<h2 style="margin-top: 0;">Portfolio</h2>'
-        '<div style="color:#64748b; font-size:13px; margin-bottom:16px;">'
+        '<div style="color:#5c6678; font-size:13px; margin-bottom:16px;">'
         'Manual holdings - yfinance prices (delayed, not real-time) - '
         'edit <code>holdings.csv</code> to update positions.'
         '</div>',
@@ -1476,7 +1475,7 @@ def _render_portfolio_performance_sub(
                     height=max(180, 28 * len(winners)),
                     use_container_width=True,
                     horizontal=True,
-                    color="#22c55e",
+                    color="#8ec07c",
                 )
             else:
                 st.caption("No winners yet.")
@@ -1491,7 +1490,7 @@ def _render_portfolio_performance_sub(
                     height=max(180, 28 * len(losers)),
                     use_container_width=True,
                     horizontal=True,
-                    color="#ef4444",
+                    color="#e06a52",
                 )
             else:
                 st.caption("No losers yet.")
@@ -1553,7 +1552,7 @@ def _render_portfolio_performance_sub(
         chart_df,
         height=360,
         use_container_width=True,
-        color=["#60a5fa", "#94a3b8"],
+        color=["#5fb3b3", "#8592a8"],
     )
 
     # Summary stats under chart.
@@ -1616,7 +1615,7 @@ def _render_portfolio_concentration_sub(holdings: pd.DataFrame, total_mv: float)
         height=max(240, 32 * len(theme_agg)),
         use_container_width=True,
         horizontal=True,
-        color="#60a5fa",
+        color="#5fb3b3",
     )
 
     counts = holdings.groupby("theme")["ticker"].nunique().rename("positions")
@@ -1687,7 +1686,7 @@ def _render_portfolio_concentration_sub(holdings: pd.DataFrame, total_mv: float)
             height=max(220, 28 * len(top10)),
             use_container_width=True,
             horizontal=True,
-            color="#a78bfa",
+            color="#b48ee0",
         )
 
     # ---- Broker mix ----
@@ -1726,8 +1725,9 @@ def main():
         page_title="Trend Engine — Daily Digest",
         page_icon="📰",
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="auto",   # collapses on phones, opens on desktop
     )
+    hub_theme.inject()
 
     # Page-level CSS — minimal dark editorial aesthetic
     st.markdown("""
@@ -1744,7 +1744,7 @@ def main():
     # ---- Header ----
     st.markdown(
         '<h1 style="margin-bottom: 0;">Trend Engine</h1>'
-        '<div style="color: #64748b; font-size: 13px; margin-bottom: 32px; '
+        '<div style="color: #5c6678; font-size: 13px; margin-bottom: 32px; '
         'font-family: monospace; letter-spacing: 0.05em;">'
         'arXiv research + macro news · scored for 2-year retail investing horizon'
         '</div>',

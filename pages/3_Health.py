@@ -21,6 +21,9 @@ import streamlit as st
 # ── page config ──────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Health", page_icon="💚", layout="wide")
 
+import hub_theme
+hub_theme.inject()
+
 # Resolve project root — check all plausible locations and use whichever has the file.
 # Streamlit Cloud: cwd = repo root, __file__ = /mount/src/<repo>/pages/3_Health.py
 _CANDIDATES = [
@@ -43,13 +46,13 @@ SNAPSHOT_CSV = _find_file("health_snapshot.csv")
 GDRIVE_FILE_ID = "14ScOHFxb-3sXGx_-YHsff2sHxHBiO5c4WDkk1vdXZZ0"
 
 # ── colour palette (dark-mode friendly) ──────────────────────────────────────
-C_SLEEP   = "#7eb8f7"   # soft blue
-C_HRV     = "#7eeab0"   # soft green
-C_RHR     = "#f7a07e"   # soft orange
-C_STRESS  = "#f7d07e"   # soft yellow
-C_ALCOHOL = "#c084fc"   # soft purple
-C_MOOD    = "#fb7185"   # soft pink
-C_WEIGHT  = "#94a3b8"   # slate
+C_SLEEP   = "#5fb3b3"   # soft blue
+C_HRV     = "#8ec07c"   # soft green
+C_RHR     = "#e8a84c"   # soft orange
+C_STRESS  = "#f2d84b"   # soft yellow
+C_ALCOHOL = "#b48ee0"   # soft purple
+C_MOOD    = "#e06a52"   # soft pink
+C_WEIGHT  = "#8592a8"   # slate
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -174,7 +177,7 @@ def merge_sources(garmin: pd.DataFrame, manual: pd.DataFrame) -> pd.DataFrame:
 # METRIC CARD HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def metric_card(col, label, value, unit="", delta=None, color="#7eb8f7"):
+def metric_card(col, label, value, unit="", delta=None, color="#5fb3b3"):
     """Render a single KPI card."""
     if value is None or (isinstance(value, float) and pd.isna(value)):
         display = "—"
@@ -187,9 +190,9 @@ def metric_card(col, label, value, unit="", delta=None, color="#7eb8f7"):
         f"""
         <div style="background:#1e2530;border-radius:10px;padding:14px 18px;
                     border-left:4px solid {color};margin-bottom:4px">
-            <div style="color:#94a3b8;font-size:0.75rem;letter-spacing:.05em">{label}</div>
-            <div style="color:#f1f5f9;font-size:1.6rem;font-weight:700;line-height:1.2">
-                {display}<span style="font-size:0.85rem;color:#94a3b8">{delta_str}</span>
+            <div style="color:#8592a8;font-size:0.75rem;letter-spacing:.05em">{label}</div>
+            <div style="color:#eef4f8;font-size:1.6rem;font-weight:700;line-height:1.2">
+                {display}<span style="font-size:0.85rem;color:#8592a8">{delta_str}</span>
             </div>
         </div>
         """,
@@ -199,12 +202,12 @@ def metric_card(col, label, value, unit="", delta=None, color="#7eb8f7"):
 
 def score_color(score):
     if score is None or pd.isna(score):
-        return "#94a3b8"
+        return "#8592a8"
     if score >= 75:
-        return "#7eeab0"
+        return "#8ec07c"
     if score >= 50:
-        return "#f7d07e"
-    return "#f87171"
+        return "#f2d84b"
+    return "#e06a52"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -313,7 +316,7 @@ metric_card(c4, "RHR", val(today_g, "rhr_bpm"), " bpm",
             delta=delta(today_g, yest_g, "rhr_bpm"))
 
 metric_card(c5, "Body Battery ↑", val(today_g, "body_battery_high"),
-            color="#f7d07e")
+            color="#f2d84b")
 
 tr = val(today_g, "training_readiness_score")
 metric_card(c6, "Readiness", tr,
@@ -323,10 +326,10 @@ metric_card(c6, "Readiness", tr,
 # secondary strip — steps, stress, training load
 if today_g is not None:
     c7, c8, c9, c10, _, _ = st.columns(6)
-    metric_card(c7, "Steps",      val(today_g, "steps"),      color="#94a3b8")
+    metric_card(c7, "Steps",      val(today_g, "steps"),      color="#8592a8")
     metric_card(c8, "Avg Stress", val(today_g, "avg_stress"), color=C_STRESS)
-    metric_card(c9, "Acute Load", val(today_g, "acute_load"), color="#7eb8f7")
-    metric_card(c10,"ACWR",       val(today_g, "acwr"),       color="#7eeab0")
+    metric_card(c9, "Acute Load", val(today_g, "acute_load"), color="#5fb3b3")
+    metric_card(c10,"ACWR",       val(today_g, "acwr"),       color="#8ec07c")
 
     # training readiness limiting factor
     limit = val(today_g, "training_readiness_limiting_factor")
@@ -378,14 +381,14 @@ else:
     with tab_recovery:
         col_l, col_r = st.columns(2)
         with col_l:
-            line_chart(df14, ["hrv_last_night_avg", "hrv_weekly_avg"], [C_HRV, "#4ade80"],
+            line_chart(df14, ["hrv_last_night_avg", "hrv_weekly_avg"], [C_HRV, "#8ec07c"],
                        "HRV (last night vs weekly avg)")
         with col_r:
             line_chart(df14, ["rhr_bpm"], [C_RHR], "Resting Heart Rate (bpm)")
 
         col_l2, col_r2 = st.columns(2)
         with col_l2:
-            line_chart(df14, ["body_battery_high", "body_battery_low"], [C_SLEEP, "#f87171"],
+            line_chart(df14, ["body_battery_high", "body_battery_low"], [C_SLEEP, "#e06a52"],
                        "Body Battery Range")
         with col_r2:
             line_chart(df14, ["training_readiness_score"], [C_HRV], "Training Readiness")
@@ -427,10 +430,10 @@ else:
     with tab_training:
         col_l, col_r = st.columns(2)
         with col_l:
-            line_chart(df14, ["acute_load", "chronic_load"], ["#7eb8f7", "#f7a07e"],
+            line_chart(df14, ["acute_load", "chronic_load"], ["#5fb3b3", "#e8a84c"],
                        "Training Load (acute vs chronic)")
         with col_r:
-            line_chart(df14, ["acwr"], ["#7eeab0"], "ACWR (acute:chronic ratio)")
+            line_chart(df14, ["acwr"], ["#8ec07c"], "ACWR (acute:chronic ratio)")
             st.caption("Sweet spot: 0.8–1.3 · Above 1.5 = injury risk zone")
 
         has_training = "training_summary" in df14.columns and df14["training_summary"].notna().any()
@@ -456,12 +459,12 @@ else:
             if has_calories or has_protein:
                 nutrition_cols = [c for c in ["est_calories", "est_protein_g"]
                                   if c in df14.columns and df14[c].notna().any()]
-                line_chart(df14, nutrition_cols, ["#f7a07e", "#7eeab0"],
+                line_chart(df14, nutrition_cols, ["#e8a84c", "#8ec07c"],
                            "Estimated Calories & Protein")
             else:
                 st.caption("Nutrition: not yet synced from Google Sheet.")
 
-        bar_chart(df14, "steps", "#94a3b8", "Daily Steps") if "steps" in df14.columns else None
+        bar_chart(df14, "steps", "#8592a8", "Daily Steps") if "steps" in df14.columns else None
 
 st.divider()
 

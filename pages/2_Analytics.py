@@ -35,6 +35,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+import hub_theme
+
 # Shadow portfolio module (Week 8 addition). Wrapped in try/except so the
 # Analytics page renders even if yfinance isn't installed locally — the
 # section will degrade to an "install yfinance" hint.
@@ -54,10 +56,10 @@ RESULTS_GLOB = "results_*.csv"
 # Score-tier palette mirrors the digest. Reused for chart colors so flag
 # distribution charts read at a glance against the digest itself.
 FLAG_COLORS = {
-    "thesis":    "#fb923c",   # warm amber
-    "watchlist": "#94a3b8",   # slate
-    "longshot":  "#34d399",   # green
-    "skip":      "#52525b",   # muted graphite
+    "thesis":    hub_theme.LEMON,
+    "watchlist": hub_theme.TEAL,
+    "longshot":  hub_theme.LEAF,
+    "skip":      hub_theme.MUTED,
 }
 
 DOMAIN_ORDER = ["AI", "Bio", "Health", "Space", "Quantum", "Robotics", "Energy", "Climate"]
@@ -189,7 +191,7 @@ def render_domain_heat(latest: pd.DataFrame) -> None:
     """
     st.markdown(
         '<h2 style="margin-top:32px;">Domain heat</h2>'
-        '<div style="color:#64748b; font-size:13px; margin-bottom:16px;">'
+        '<div style="color:#5c6678; font-size:13px; margin-bottom:16px;">'
         'Volume vs mean signal per domain — across all scored papers (latest score per paper).'
         '</div>',
         unsafe_allow_html=True,
@@ -214,7 +216,7 @@ def render_domain_heat(latest: pd.DataFrame) -> None:
     # Display: bar chart for counts + adjacent stat table
     col_chart, col_table = st.columns([3, 2])
     with col_chart:
-        st.bar_chart(grp[["papers"]], color="#fb923c", height=320)
+        st.bar_chart(grp[["papers"]], color="#e8a84c", height=320)
     with col_table:
         # Reset index so 'domain' is a real column we can show + use ProgressColumn
         # for mean_final (gives the visual "heat" cue without needing matplotlib).
@@ -246,7 +248,7 @@ def render_flag_over_time(all_runs: pd.DataFrame) -> None:
     """
     st.markdown(
         '<h2 style="margin-top:48px;">Flag distribution over time</h2>'
-        '<div style="color:#64748b; font-size:13px; margin-bottom:16px;">'
+        '<div style="color:#5c6678; font-size:13px; margin-bottom:16px;">'
         'Each scoring run, broken out by flag. Watch for sudden swings — '
         'usually rubric drift, occasionally a real signal week.'
         '</div>',
@@ -289,7 +291,7 @@ def render_top_horizon(latest: pd.DataFrame) -> None:
     """
     st.markdown(
         '<h2 style="margin-top:48px;">Top by Horizon</h2>'
-        '<div style="color:#64748b; font-size:13px; margin-bottom:16px;">'
+        '<div style="color:#5c6678; font-size:13px; margin-bottom:16px;">'
         'Long-term transformative ceiling. High Horizon + low Final = the longshot pile. '
         'High Horizon + high Final = the trillion-dollar lottery ticket that\'s also actionable today.'
         '</div>',
@@ -345,7 +347,7 @@ def render_watchlist_aging(latest: pd.DataFrame, all_runs: pd.DataFrame) -> None
     """
     st.markdown(
         '<h2 style="margin-top:48px;">Watchlist aging</h2>'
-        '<div style="color:#64748b; font-size:13px; margin-bottom:16px;">'
+        '<div style="color:#5c6678; font-size:13px; margin-bottom:16px;">'
         'Watchlist items, oldest first. The point of a watchlist is to revisit — '
         'this is the revisit queue.'
         '</div>',
@@ -454,7 +456,7 @@ def render_shadow_portfolio() -> None:
     """
     st.markdown(
         '<h2 style="margin-top:48px;">Shadow portfolio</h2>'
-        '<div style="color:#64748b; font-size:13px; margin-bottom:16px;">'
+        '<div style="color:#5c6678; font-size:13px; margin-bottom:16px;">'
         'Tickers the system flagged 3+ times in a 7-day window. Price snapshotted '
         'at threshold-crossing; current price refreshed via yfinance. '
         'Did we have the signal before the move?'
@@ -529,7 +531,7 @@ def render_shadow_portfolio() -> None:
         Arxiv IDs link to arxiv.org. News IDs link to the article URL from
         news_results CSVs (when found). Returns inline-HTML string."""
         if not isinstance(paper_ids_str, str) or not paper_ids_str.strip():
-            return "<span style=\"color:#64748b;\">—</span>"
+            return "<span style=\"color:#5c6678;\">—</span>"
         ids = [pid.strip() for pid in paper_ids_str.split(";") if pid.strip()]
         links = []
         for pid in ids:
@@ -541,13 +543,13 @@ def render_shadow_portfolio() -> None:
                     label = source_key
                     links.append(
                         f"<a href=\"{url}\" target=\"_blank\" "
-                        f"style=\"color:#93c5fd; text-decoration:underline; "
+                        f"style=\"color:#5fb3b3; text-decoration:underline; "
                         f"margin-right:6px; font-family:monospace; font-size:12px;\">"
                         f"{label}↗</a>"
                     )
                 else:
                     links.append(
-                        f"<span style=\"color:#64748b; margin-right:6px; "
+                        f"<span style=\"color:#5c6678; margin-right:6px; "
                         f"font-family:monospace; font-size:12px;\">{source_key}</span>"
                     )
             else:
@@ -555,7 +557,7 @@ def render_shadow_portfolio() -> None:
                 url = f"https://arxiv.org/abs/{pid}"
                 links.append(
                     f"<a href=\"{url}\" target=\"_blank\" "
-                    f"style=\"color:#fdba74; text-decoration:underline; "
+                    f"style=\"color:#f2d84b; text-decoration:underline; "
                     f"margin-right:6px; font-family:monospace; font-size:12px;\">"
                     f"arxiv↗</a>"
                 )
@@ -567,7 +569,7 @@ def render_shadow_portfolio() -> None:
     for c, h in zip(cols, headers):
         c.markdown(
             f"<div style=\"font-family:monospace; font-size:11px; "
-            f"letter-spacing:0.1em; color:#64748b; text-transform:uppercase; "
+            f"letter-spacing:0.1em; color:#5c6678; text-transform:uppercase; "
             f"border-bottom:1px solid rgba(120,120,140,0.2); padding-bottom:6px;\">"
             f"{h}</div>",
             unsafe_allow_html=True,
@@ -582,9 +584,9 @@ def render_shadow_portfolio() -> None:
         mc = row.get("mention_count_at_trigger")
         tp_str = f"${float(tp):.2f}" if pd.notna(tp) and str(tp).strip() not in ("", "nan") else "—"
         cp_str = f"${float(cp):.2f}" if pd.notna(cp) else "—"
-        pc_color = "#34d399" if (pd.notna(pc) and pc > 0) else ("#f87171" if pd.notna(pc) and pc < 0 else "#64748b")
+        pc_color = "#8ec07c" if (pd.notna(pc) and pc > 0) else ("#e06a52" if pd.notna(pc) and pc < 0 else "#5c6678")
         pc_str = (f"<span style=\"color:{pc_color};\">{pc:+.1f}%</span>"
-                  if pd.notna(pc) else "<span style=\"color:#64748b;\">—</span>")
+                  if pd.notna(pc) else "<span style=\"color:#5c6678;\">—</span>")
         cols[0].markdown(f"**{row['ticker']}**")
         cols[1].markdown(f"<span style=\"font-family:monospace;font-size:12px;\">"
                          f"{row['first_trigger_date']}</span>", unsafe_allow_html=True)
@@ -604,6 +606,7 @@ def main():
         layout="wide",
         initial_sidebar_state="collapsed",
     )
+    hub_theme.inject()
 
     # Inherit the digest's editorial CSS so the two pages feel like siblings
     st.markdown("""
@@ -617,7 +620,7 @@ def main():
     # Header
     st.markdown(
         '<h1 style="margin-bottom: 0;">Trend Engine — Analytics</h1>'
-        '<div style="color: #64748b; font-size: 13px; margin-bottom: 32px; '
+        '<div style="color: #5c6678; font-size: 13px; margin-bottom: 32px; '
         'font-family: monospace; letter-spacing: 0.05em;">'
         'cross-run patterns · domain heat · watchlist revisit queue'
         '</div>',
@@ -641,7 +644,7 @@ def main():
     render_kpi_strip(all_runs, latest)
 
     st.markdown(
-        f'<div style="color:#64748b; font-size:12px; font-family:monospace; '
+        f'<div style="color:#5c6678; font-size:12px; font-family:monospace; '
         f'margin-top:8px;">Loaded {len(file_tuple)} run file(s) · '
         f'{len(all_runs)} scoring events · {len(latest)} unique papers</div>',
         unsafe_allow_html=True,
