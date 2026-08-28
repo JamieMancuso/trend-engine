@@ -1,0 +1,27 @@
+id,source,title,url,author,posted_at,hn_score,hn_comments,fetched_at
+hn:49468083,hackernews,Saving 100 terabytes of memory by optimizing 1.1.1.1's DNS cache,https://blog.cloudflare.com/dns-cache-memory-optimization-1111/,TangerineDream,2026-08-27T17:17:57+00:00,542,150,2026-08-28T02:24:35+00:00
+hn:49466917,hackernews,Small Models Have Arrived,https://calv.info/small-models-have-arrived,tosh,2026-08-27T15:56:58+00:00,482,215,2026-08-28T02:24:37+00:00
+hn:49465169,hackernews,507 Mechanical Movements,https://507movements.com/,helloplanets,2026-08-27T14:08:18+00:00,482,67,2026-08-28T02:24:37+00:00
+hn:49471965,hackernews,"Show HN: OpenTIE and OpenXWA, Modern Ports of Tie Fighter and X-Wing Alliance",https://github.com/elyosh/OpenTIE/,elyosh,2026-08-27T22:10:47+00:00,73,16,2026-08-28T02:24:38+00:00
+hn:49472820,hackernews,Terminal-Bench-Science: Evaluating AI agents on scientific research workflows,https://www.terminal-bench-science.ai/announcement,matt_d,2026-08-28T00:06:51+00:00,30,4,2026-08-28T02:24:38+00:00
+hn:49468818,hackernews,Gemini-3.5-Transcribe,https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5-transcribe/,k9294,2026-08-27T18:03:42+00:00,158,36,2026-08-28T02:24:38+00:00
+hn:49471407,hackernews,Show HN: We built open OpenRouter that turns usage into a better model,https://github.com/experientiallabs/experiential,SilenN,2026-08-27T21:18:35+00:00,110,17,2026-08-28T02:24:38+00:00
+hn:49462763,hackernews,Microduck,https://pollen-robotics.com/microduck/,robotswantdata,2026-08-27T10:57:56+00:00,519,184,2026-08-28T02:24:39+00:00
+hn:49471714,hackernews,"AI Engineer Notebooks – free, framework-free RAG/agents/evals on Colab",https://github.com/calmrocks/ai-engineer-notebooks,calmrocks,2026-08-27T21:46:39+00:00,48,4,2026-08-28T02:24:39+00:00
+hn:49472161,hackernews,Select * from Internet.blogposts,https://pfrazee.leaflet.pub/3mu3p2smmis22,mmattbtw,2026-08-27T22:34:32+00:00,43,15,2026-08-28T02:24:39+00:00
+hn:49468642,hackernews,We found a division by zero bug in FFmpeg with a vibecoded fuzzer,https://code.ffmpeg.org/FFmpeg/FFmpeg/issues/24290,dclavijo,2026-08-27T17:53:40+00:00,184,145,2026-08-28T02:24:41+00:00
+hn:49447057,hackernews,The turbulent AI era is here,https://www.gatesnotes.com/work/make-ai-work-for-everyone/reader/a-turbulent-ai-era-and-critical-choices-to-make?WT.mc_id=20260826_ai-overture-2026-med-med,nanna,2026-08-26T11:23:54+00:00,224,469,2026-08-28T02:24:41+00:00
+hn:49461817,hackernews,Show HN: The load-bearing vocabulary of Claude,https://louisabraham.github.io/load-bearing/,Labo333,2026-08-27T08:59:49+00:00,363,175,2026-08-28T02:24:41+00:00
+hn:49457722,hackernews,Afterglow: Run classic After Dark screen savers on modern macOS,https://morphing.cloud/afterglow/,NaOH,2026-08-27T00:18:27+00:00,96,37,2026-08-28T02:24:42+00:00
+hn:49466006,hackernews,Decompiling a Nintendo 64 game in 84 days,https://blog.chrislewis.au/decompiling-a-nintendo-64-game-in-84-days/,knackers,2026-08-27T15:01:11+00:00,184,119,2026-08-28T02:24:42+00:00
+hn:49468593,hackernews,M5Stack Launches PaperMono,https://shop.m5stack.com/blogs/news/m5stack-launches-papermono-a-compact-e-ink-development-terminal-for-connected-projects,marksully,2026-08-27T17:50:57+00:00,94,39,2026-08-28T02:24:43+00:00
+hn:49464543,hackernews,Emacs 31: An unofficial guide to Markdown-ts-mode,https://rahuljuliato.com/posts/markdown-ts-mode-emacs-31,RahulMJ,2026-08-27T13:22:36+00:00,153,65,2026-08-28T02:24:43+00:00
+hn:49466894,hackernews,"Suica, Japan's First IC Transit Card",https://www.tokyodev.com/articles/the-story-of-suica,zdw,2026-08-27T15:55:12+00:00,194,165,2026-08-28T02:24:44+00:00
+hn:49468834,hackernews,Previewing the Model Hardware Standard,https://www.anthropic.com/news/model-hardware-standard-research-preview,surprisetalk,2026-08-27T18:04:50+00:00,82,32,2026-08-28T02:24:44+00:00
+hn:49458161,hackernews,Nvidia agrees to acquire Hugging Face for $13B,https://www.businessinsider.com/nvidia-in-talks-to-buy-hugging-face-13-billion-dollars-2026-8,mfiguiere,2026-08-27T01:12:55+00:00,1834,858,2026-08-28T02:24:44+00:00
+hn:49467922,hackernews,Gemini Omni 1.1 Flash,https://blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-omni-1-1-flash/,saretup,2026-08-27T17:06:32+00:00,192,142,2026-08-28T02:24:45+00:00
+hn:49466622,hackernews,Engineered yeast for converting plastic and biomass compounds to food additives,https://acs.digitellinc.com/live/37/session/586399,ehwa37,2026-08-27T15:40:04+00:00,82,59,2026-08-28T02:24:45+00:00
+hn:49468816,hackernews,Show HN: Voronoi Go,https://voronoigo.com/,igpay,2026-08-27T18:03:37+00:00,89,12,2026-08-28T02:24:45+00:00
+hn:49464314,hackernews,"MIT's Ad Hoc Committee on AI Use in Teaching, Learning, and Research Training",https://aiandeducation.mit.edu/report/,pbui,2026-08-27T13:07:45+00:00,117,72,2026-08-28T02:24:47+00:00
+hn:49466188,hackernews,The mechanics of the Nepali flash flood,https://www.economist.com/science-and-technology/2026/08/27/the-terrifying-mechanics-of-the-nepali-flash-flood,vinni2,2026-08-27T15:13:26+00:00,83,42,2026-08-28T02:24:49+00:00
+hn:49464414,hackernews,Aphantasia Beginner's Guide,https://aphantasia.com/guide,ksec,2026-08-27T13:14:20+00:00,137,312,2026-08-28T02:24:49+00:00
